@@ -30,4 +30,6 @@ class testApp : public ofBaseApp
 		ofLight				light;
 		ofEasyCam			cam;
 	
+		ofTrueTypeFont		fontWorld;
+	
 };

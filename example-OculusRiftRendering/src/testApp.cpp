@@ -10,6 +10,9 @@ void testApp::setup()
 	
 	//ofSetFrameRate( 60 );
 	//ofSetVerticalSync( true );
+		
+	fontWorld.loadFont( "Fonts/DIN.otf", 18, true, false, true );
+	//fontWorld.loadFont( "Fonts/DIN.otf", 18 );
 
 	oculusRift.init( 1280, 800, 4 );
 	oculusRift.setPosition( 0,-30,0 );
@@ -25,10 +28,10 @@ void testApp::update()
 	float frameDeltaTime = currTime - lastUpdateTime;
 	lastUpdateTime = currTime;
 	
-	if(		 ofGetKeyPressed('i') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() + 0.05f ); }
-	else if( ofGetKeyPressed('o') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() - 0.05f ); }
-	else if( ofGetKeyPressed('k') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() + 10.0f ); }
-	else if( ofGetKeyPressed('l') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() - 10.0f ); }
+	if(		 ofGetKeyPressed('i') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() + 0.001f ); }
+	else if( ofGetKeyPressed('o') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() - 0.001f ); }
+	else if( ofGetKeyPressed('k') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() + 1.0f ); }
+	else if( ofGetKeyPressed('l') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() - 1.0f ); }
 	
 	if(	ofGetKeyPressed(OF_KEY_UP) )    { oculusRift.dolly(  30.0f * frameDeltaTime ); }
 	if( ofGetKeyPressed(OF_KEY_DOWN) )  { oculusRift.dolly( -30.0f * frameDeltaTime ); }
@@ -71,6 +74,19 @@ void testApp::drawSceneGeometry()
 		{
 			ofBox( ofPoint(0,25,i * -100), 50);
 		}
+	ofPopMatrix();
+	
+	string tmpStr = "Do Warping: " + ofToString( oculusRift.getDoWarping() ) + "\n";
+	tmpStr += "Inter Ocular Distance: "  + ofToString( oculusRift.getInterOcularDistance() ) + "\n";
+	tmpStr += "Shader Scale Factor: "  + ofToString( oculusRift.getShaderScaleFactor() ) + "\n";
+	
+	ofSetColor( 255 );
+	
+	ofPushMatrix();
+		ofTranslate( ofPoint(-60,280,-200) );
+		ofRotateZ( 180 );
+		ofRotateY( 180 );
+		fontWorld.drawString( tmpStr, 0.0f, 0.0f );
 	ofPopMatrix();
 	
 	ofSetColor(255);

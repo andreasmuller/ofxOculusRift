@@ -70,7 +70,7 @@ class ofxOculusRift : public ofCamera
 	
 		void				shutdown();
 		
-//	private:
+	private:
 	
 		bool				initSensor();
 		void				clearSensor();

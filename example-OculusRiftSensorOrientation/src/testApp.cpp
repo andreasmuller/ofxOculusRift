@@ -5,17 +5,14 @@ void testApp::setup()
 {
 	ofSetFrameRate(999);
 	ofSetVerticalSync( false );
-	
-	//Init();
-	
+		
 	oculusRift.init(0,0);
-
 }
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-	//Output();
+
 
 }
 
@@ -49,6 +46,7 @@ void testApp::draw()
 				ofTranslate( 0.0f, 0.0f, 100.0f );
 				ofSetColor( 0, 0, 255 );
 				ofBox( 100 );
+
 			ofPopMatrix();
 	
 		ofPopMatrix();
