@@ -3,39 +3,45 @@
 //--------------------------------------------------------------
 void testApp::setup()
 {
-	ofSetLogLevel( OF_LOG_VERBOSE );	
-	
-//	ofSetFrameRate(999);
+	ofSetLogLevel( OF_LOG_VERBOSE );
 	ofSetVerticalSync( true );
-	
-		
-	fontWorld.loadFont( "Fonts/DIN.otf", 18, true, false, true );
 	
 	oculusRift.baseCamera = &cam;
 	oculusRift.setup();
 	
-	drawRift = false;
+	for(int i = 0; i < 100; i++){
+		DemoSphere d;
+		d.color = ofColor(ofRandom(255),
+						  ofRandom(255),
+						  ofRandom(255));
+		
+		d.pos = ofVec3f(ofRandom(-500, 500),
+						0,
+						ofRandom(-500,500));
+		
+		d.floatPos.x = d.pos.x;
+		d.floatPos.z = d.pos.z;
+		
+		d.radius = ofRandom(2, 50);
+		demos.push_back(d);
+	}
+	
+	//enable mouse;
+	cam.begin();
+	cam.end();
 }
 
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-	
-//	float currTime = ofGetElapsedTimef();
-//	float frameDeltaTime = currTime - lastUpdateTime;
-//	lastUpdateTime = currTime;
-//	
-//	if(		 ofGetKeyPressed('i') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() + 0.001f ); }
-//	else if( ofGetKeyPressed('o') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() - 0.001f ); }
-//	else if( ofGetKeyPressed('k') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() + 1.0f ); }
-//	else if( ofGetKeyPressed('l') ) { oculusRift.setInterOcularDistance( oculusRift.getInterOcularDistance() - 1.0f ); }
-//	
-//	if(	ofGetKeyPressed(OF_KEY_UP) )    { oculusRift.dolly(  30.0f * frameDeltaTime ); }
-//	if( ofGetKeyPressed(OF_KEY_DOWN) )  { oculusRift.dolly( -30.0f * frameDeltaTime ); }
-//	if( ofGetKeyPressed(OF_KEY_LEFT) )  { oculusRift.truck(  30.0f * frameDeltaTime ); }
-//	if( ofGetKeyPressed(OF_KEY_RIGHT) ) { oculusRift.truck( -30.0f * frameDeltaTime ); }
-	
+	for(int i = 0; i < demos.size(); i++){
+		demos[i].floatPos.y = ofSignedNoise(ofGetElapsedTimef()/10.0,
+									  demos[i].pos.x/100.0,
+									  demos[i].pos.z/100.0,
+									  demos[i].radius*100.0) * demos[i].radius*20.;
+		
+	}
 }
 
 
@@ -43,33 +49,17 @@ void testApp::update()
 void testApp::draw()
 {
 
-	if(drawRift){
-		oculusRift.beginLeftEye();
-		drawScene();
-		oculusRift.endLeftEye();
-
-		oculusRift.beginRightEye();
-		drawScene();
-		oculusRift.endRightEye();
-		
-		oculusRift.draw();
-	}
-	else{
-		cam.begin();
-		drawScene();
-		cam.end();
-	}
 	
-//	oculusRift.beginRenderSceneLeftEye();
-//		drawSceneGeometry();
-//	oculusRift.endRenderSceneLeftEye();
-//	
-//	oculusRift.beginRenderSceneRightEye();
-//		drawSceneGeometry();
-//	oculusRift.endRenderSceneRightEye();
-//	
-//	ofSetColor( 255 );
-//	oculusRift.draw( ofVec2f(0,0), ofVec2f( ofGetWidth(), ofGetHeight() ) );
+	glEnable(GL_DEPTH_TEST);
+	oculusRift.beginLeftEye();
+	drawScene();
+	oculusRift.endLeftEye();
+
+	oculusRift.beginRightEye();
+	drawScene();
+	oculusRift.endRightEye();
+	
+	oculusRift.draw();
 }
 
 //--------------------------------------------------------------
@@ -77,61 +67,36 @@ void testApp::drawScene()
 {
 	
 	ofPushMatrix();
-		ofRotate(90, 0, 0, -1);
-		ofDrawGridPlane(500.0f, 40.0f, false );
+	ofRotate(90, 0, 0, -1);
+	ofDrawGridPlane(500.0f, 10.0f, false );
 	ofPopMatrix();
-
 	
-//	ofSetColor(120);
-//	
-//	ofPushMatrix();
-//		ofRotate(90, 0, 0, -1);
-//		ofDrawGridPlane(500.0f, 40.0f, false );
-//	ofPopMatrix();
-//	
-//	ofSetColor( 255, 0, 0 );
-//	
-//	ofPushMatrix();
-//		ofTranslate( ofPoint(10,0,-80) );
-//		for( int i = 0; i < 20; i ++ )
-//		{
-//			ofBox( ofPoint(0,25,i * -100), 50);
-//		}
-//	ofPopMatrix();
-//	
-//	string tmpStr = "Do Warping: " + ofToString( oculusRift.getDoWarping() ) + "\n";
-//	tmpStr += "Inter Ocular Distance: "  + ofToString( oculusRift.getInterOcularDistance() ) + "\n";
-//	tmpStr += "Shader Scale Factor: "  + ofToString( oculusRift.getShaderScaleFactor() ) + "\n";
-//	
-//	ofSetColor( 255 );
-//	
-//	ofPushMatrix();
-//		ofTranslate( ofPoint(-60,280,-200) );
-//		ofRotateZ( 180 );
-//		ofRotateY( 180 );
-//		fontWorld.drawString( tmpStr, 0.0f, 0.0f );
-//	ofPopMatrix();
-//	
-//	ofSetColor(255);
+	ofPushStyle();
+	ofNoFill();
+	for(int i = 0; i < demos.size(); i++){
+		ofPushMatrix();
+		ofRotate(ofGetElapsedTimef()*(50-demos[i].radius), 0, 1, 0);
+		ofTranslate(demos[i].floatPos);
+		ofRotate(ofGetElapsedTimef()*4*(50-demos[i].radius), 0, 1, 0);
+		ofSetColor(demos[i].color);
+		ofSphere(demos[i].radius);
+		ofPopMatrix();
+	}
+	ofPopStyle();
 }
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key)
 {
-	if(key == 'r'){
-		drawRift = !drawRift;
-	}
 	if( key == 'f' )
 	{
+		//gotta toggle full screen for it to be right
 		ofToggleFullscreen();
 	}
+	
 	if(key == 's'){
 		oculusRift.reloadShader();
 	}
-//	if( key == 'w' )
-//	{
-//		oculusRift.setDoWarping( !oculusRift.getDoWarping() );
-//	}
 }
 
 //--------------------------------------------------------------

@@ -1,8 +1,9 @@
 //
-//  ofxOculusRift.h
+//  ofxOculusRift.cpp
+//  OculusRiftRendering
 //
-//  Created by James George September 27th 2013
-//
+//  Created by Andreas Müller on 30/04/2013.
+//  Updated by James George September 27th 2013
 //
 
 #pragma once 
