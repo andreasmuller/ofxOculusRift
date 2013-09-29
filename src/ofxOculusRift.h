@@ -1,8 +1,7 @@
 //
 //  ofxOculusRift.h
-//  OculusRiftRendering
 //
-//  Created by Andreas Müller on 30/04/2013.
+//  Created by James George September 27th 2013
 //
 //
 
@@ -15,106 +14,58 @@ using namespace OVR;
 #include <iostream>
 
 //#define STD_GRAV 9.81 // What SHOULD work with Rift, but off by 1000
-#define STD_GRAV 0.00981  // This gives nice 1.00G on Z with Rift face down !!!
+//#define STD_GRAV 0.00981  // This gives nice 1.00G on Z with Rift face down !!!
 
-#define DTR = 0.0174532925f
-
-
-static float K0 = 1.0f;
-static float K1 = 0.22f;
-static float K2 = 0.24f;
-static float K3 = 0.0f;
+//#define DTR = 0.0174532925f
 
 
-class ofxOculusRift : public ofCamera
+
+class ofxOculusRift
 {
-	public:
-	
-		ofxOculusRift();
-		~ofxOculusRift();
-	
-		bool				init( int _width, int _height, int _fboNumSamples = 0 );
-	
-		void				beginRenderSceneLeftEye();
-		void				endRenderSceneLeftEye();
-	
-		void				beginRenderSceneRightEye();
-		void				endRenderSceneRightEye();
-
-		void				draw( ofVec2f pos, ofVec2f size );
-	
-		//ofQuaternion		getOrientationQuat() const; //
-
-		ofQuaternion		getHeadsetOrientationQuat(); // this is confusing, but I'm trying to read the sensor
-														 // (if needed this frame) when getOrientationQuat is called,
-														 // but getOrientationQuat is marked const. For now adding 'Headset'
-														 // prefix to the get functions. Todo: re-write
+  public:
 		
-		ofQuaternion		getHeadsetViewOrientationQuat();	// the orientation to make a view from the headset
+	ofxOculusRift();
+	~ofxOculusRift();
 	
-		ofMatrix4x4			getHeadsetOrientationMat();
-		ofMatrix4x4			getHeadsetViewOrientationMat();
+	//set a pointer to the camera you want as the base perspective
+	//the oculus rendering will create a stereo pair from this camera
+	//and mix in the head transformation
+	ofCamera* baseCamera;
 	
-		ofVec3f				getAcceleration();
-		
-		void				setNeedSensorReadingThisFrame( bool _needSensorReading );
+	bool setup();
+	bool isSetup();
 	
-		void				setInterOcularDistance( float _iod );
-		float				getInterOcularDistance();
-		
-		void				setShaderScaleFactor( float _scale );
-		float				getShaderScaleFactor();
+	void beginLeftEye();
+	void endLeftEye();
 	
-		void				setDoWarping( bool _doWarping );
-		bool				getDoWarping();
+	void beginRightEye();
+	void endRightEye();
 	
-		void				shutdown();
-		
-	private:
+	void draw();
 	
-		bool				initSensor();
-		void				clearSensor();
+	void setUsePredictedOrientation(bool usePredicted);
 	
-		void				beginRender( float interOcularShift, ofFbo* _fbo  );
-		void				endRender( ofFbo* _fbo );
+	void reloadShader();
 	
-		void				readSensorIfNeededThisFrame();
+  private:
+	bool bSetup;
+	bool bUsePredictedOrientation;
 	
-		void				setupScreenPerspective(float _interOcularDistance,
-													float width, float height,
-													ofOrientation orientation,
-													bool vFlip,
-													float fov,
-													float nearDist, float farDist );
-	
-		void				renderDistortedEyeNew( bool _isLeftEye, float x, float y, float w, float h );
-	
-		void				initFBO(int screenWidth, int screenHeight);
+	Ptr<DeviceManager>	pManager;
+	Ptr<HMDDevice>		pHMD;
+	Ptr<SensorDevice>	pSensor;
+	SensorFusion		FusionResult;
+	HMDInfo				hmdInfo;
 
-		bool				doWarping;	
-		ofShader			hmdWarpShader;
-		float				shaderScaleFactor;
+	OVR::Util::Render::StereoConfig stereo;
+	float renderScale;
 
-	
-		float				interOcularDistance;
-	
-		ofFbo				eyeFboLeft;  // Todo: draw straight into a full sized FBO
-		ofFbo				eyeFboRight;
-	
-		bool				needSensorReadingThisFrame;
-	
-		ofVec3f				acc;
-	
-		// Todo: re-write to use an ofFbo, either re-write shader to do texture rect coordinates or init a gl_texture_2d that is npot
-		GLuint				colorTextureID;
-		GLuint				framebufferID;
-		GLuint				depthRenderBufferID;
-	
-		Ptr<DeviceManager>	pManager;
-		Ptr<HMDDevice>		pHMD;
-		Ptr<SensorDevice>	pSensor;
-		SensorFusion		FusionResult;
-		HMDInfo				Info;
-		bool				InfoLoaded;
+	ofVboMesh leftEyeMesh;
+	ofVboMesh rightEyeMesh;
+	ofFbo renderTarget;
+	ofShader distortionShader;
+
+	void setupEyeParams(OVR::Util::Render::StereoEye eye);
+	void setupShaderUniforms(OVR::Util::Render::StereoEye eye);
 	
 };
