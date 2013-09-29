@@ -11,7 +11,7 @@ class testApp : public ofBaseApp
 		void update();
 		void draw();
 		
-		void drawSceneGeometry();
+		void drawScene();
 		
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -24,12 +24,10 @@ class testApp : public ofBaseApp
 		void gotMessage(ofMessage msg);
 	
 		ofxOculusRift		oculusRift;
-	
-		float				lastUpdateTime;
-	
+
 		ofLight				light;
 		ofEasyCam			cam;
 	
 		ofTrueTypeFont		fontWorld;
-	
+		bool drawRift;
 };
