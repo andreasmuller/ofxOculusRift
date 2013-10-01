@@ -3,6 +3,7 @@
 //--------------------------------------------------------------
 void testApp::setup()
 {
+	ofBackground(0);
 	ofSetLogLevel( OF_LOG_VERBOSE );
 	ofSetVerticalSync( true );
 	
@@ -51,15 +52,24 @@ void testApp::draw()
 
 	
 	glEnable(GL_DEPTH_TEST);
-	oculusRift.beginLeftEye();
-	drawScene();
-	oculusRift.endLeftEye();
-
-	oculusRift.beginRightEye();
-	drawScene();
-	oculusRift.endRightEye();
+	if(oculusRift.isSetup()){
+		oculusRift.beginLeftEye();
+		drawScene();
+		oculusRift.endLeftEye();
+		
+		oculusRift.beginRightEye();
+		drawScene();
+		oculusRift.endRightEye();
+		
+		oculusRift.draw();
+	}
+	else{
+		cam.begin();
+		drawScene();
+		cam.end();
+	}
 	
-	oculusRift.draw();
+	ofDrawBitmapString(ofToString(ofGetFrameRate()), 10,10);
 }
 
 //--------------------------------------------------------------
@@ -82,6 +92,7 @@ void testApp::drawScene()
 		ofSphere(demos[i].radius);
 		ofPopMatrix();
 	}
+		
 	ofPopStyle();
 }
 

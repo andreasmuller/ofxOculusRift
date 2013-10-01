@@ -8,6 +8,49 @@
 
 #include "ofxOculusRift.h"
 
+#define GLSL(version, shader)  "#version " #version "\n" #shader
+static const char* OculusWarpVert = GLSL(120,
+uniform vec2 dimensions;
+varying vec2 oTexCoord;
+ 
+void main()
+{
+	oTexCoord = gl_MultiTexCoord0.xy / dimensions;
+	gl_Position = ftransform();
+}
+
+										 );
+
+static const char* OculusWarpFrag = GLSL(120,
+uniform vec2 LensCenter;
+uniform vec2 ScreenCenter;
+uniform vec2 Scale;
+uniform vec2 ScaleIn;
+uniform vec4 HmdWarpParam;
+uniform sampler2DRect Texture0;
+uniform vec2 dimensions;
+varying vec2 oTexCoord;
+
+vec2 HmdWarp(vec2 in01)
+{
+	vec2  theta = (in01 - LensCenter) * ScaleIn; // Scales to [-1, 1]
+	float rSq = theta.x * theta.x + theta.y * theta.y;
+	vec2  theta1 = theta * (HmdWarpParam.x + HmdWarpParam.y * rSq +
+							HmdWarpParam.z * rSq * rSq + HmdWarpParam.w * rSq * rSq * rSq);
+	return LensCenter + Scale * theta1;
+
+}
+										 
+void main()
+{
+	vec2 tc = HmdWarp(oTexCoord);
+	if (!all(equal(clamp(tc, ScreenCenter-vec2(0.25,0.5), ScreenCenter+vec2(0.25,0.5)), tc)))
+		gl_FragColor = vec4(0);
+	else
+		gl_FragColor = texture2DRect(Texture0, tc * dimensions);
+}
+										 );
+
 ofMatrix4x4 toOf(const Matrix4f& m){
 	return ofMatrix4x4(m.M[0][0],m.M[1][0],m.M[2][0],m.M[3][0],
 					   m.M[0][1],m.M[1][1],m.M[2][1],m.M[3][1],
@@ -30,7 +73,7 @@ ofRectangle toOf(const OVR::Util::Render::Viewport vp){
 ofxOculusRift::ofxOculusRift(){
 	baseCamera = NULL;
 	bSetup = false;
-	bUsePredictedOrientation = false;
+	bUsePredictedOrientation = true;
 }
 
 ofxOculusRift::~ofxOculusRift(){
@@ -145,9 +188,15 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	
 	ofSetMatrixMode(OF_MATRIX_MODELVIEW);
 	ofLoadIdentityMatrix();
+	
+	ofMatrix4x4 headRotation;
+	if(bUsePredictedOrientation){
+	   headRotation = toOf(Matrix4f(FusionResult.GetPredictedOrientation()));
+	}
+	else{
+		headRotation = toOf(Matrix4f(FusionResult.GetOrientation()));
+	}
 
-	ofMatrix4x4 headRotation = toOf(Matrix4f(FusionResult.GetPredictedOrientation()));
-	headRotation.scale(1, -1, 1);
 	if(baseCamera != NULL){
 		headRotation = headRotation * baseCamera->getGlobalTransformMatrix();
 	}
@@ -160,7 +209,17 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 }
 
 void ofxOculusRift::reloadShader(){
-	distortionShader.load("Shaders/HmdWarp");
+	//this allows you to hack on the shader if you'd like
+	if(ofFile("Shaders/HmdWarp.vert").exists() && ofFile("Shaders/HmdWarp.frag").exists()){
+		distortionShader.load("Shaders/HmdWarp");
+	}
+	//otherwise we load the hardcoded one
+	else{
+		distortionShader.setupShaderFromSource(GL_VERTEX_SHADER, OculusWarpVert);
+		distortionShader.setupShaderFromSource(GL_FRAGMENT_SHADER, OculusWarpFrag);
+		distortionShader.linkProgram();
+	}
+	
 }
 
 void ofxOculusRift::beginLeftEye(){
@@ -220,9 +279,7 @@ void ofxOculusRift::draw(){
 	rightEyeMesh.draw();
 
 	distortionShader.end();
-
 }
-
 
 void ofxOculusRift::setupShaderUniforms(OVR::Util::Render::StereoEye eye){
 
@@ -240,7 +297,6 @@ void ofxOculusRift::setupShaderUniforms(OVR::Util::Render::StereoEye eye){
 		x = .5;
 		xCenter = -distortionConfig.XCenterOffset;
 	}
-	
 	
     float as = float(renderTarget.getWidth())/float(renderTarget.getHeight())*.5;
     // We are using 1/4 of DistortionCenter offset value here, since it is
