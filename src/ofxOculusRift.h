@@ -35,6 +35,7 @@ class ofxOculusRift
 	
 	bool setup();
 	bool isSetup();
+	bool lockView;
 	
 	void beginLeftEye();
 	void endLeftEye();
