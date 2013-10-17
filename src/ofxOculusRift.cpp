@@ -73,6 +73,7 @@ ofRectangle toOf(const OVR::Util::Render::Viewport vp){
 ofxOculusRift::ofxOculusRift(){
 	baseCamera = NULL;
 	bSetup = false;
+	viewLock = false;
 	bUsePredictedOrientation = true;
 }
 
