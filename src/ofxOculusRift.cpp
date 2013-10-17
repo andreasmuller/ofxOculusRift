@@ -80,7 +80,7 @@ ofxOculusRift::~ofxOculusRift(){
 	if(bSetup){
 		pSensor.Clear();
 		pManager.Clear();
-		System::Destroy();
+		//System::Destroy();	// causes the system to crash.
 		bSetup = false;
 	}
 }
@@ -200,7 +200,11 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	if(baseCamera != NULL){
 		headRotation = headRotation * baseCamera->getGlobalTransformMatrix();
 	}
-	ofLoadMatrix( ofMatrix4x4::getInverseOf( headRotation ));
+	
+	// lock the camera when enabled...
+	if (!lockView) {
+        	ofLoadMatrix( ofMatrix4x4::getInverseOf( headRotation ));
+	}
 	
 	ofViewport(toOf(VP));
 	ofMatrix4x4 viewAdjust = toOf(eyeRenderParams.ViewAdjust);
