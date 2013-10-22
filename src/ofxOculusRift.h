@@ -4,6 +4,7 @@
 //
 //  Created by Andreas Müller on 30/04/2013.
 //  Updated by James George September 27th 2013
+//  Updated by Jason Walters October 22nd 2013
 //
 
 #pragma once 
