@@ -56,7 +56,7 @@ class ofxOculusRift
 	Ptr<DeviceManager>	pManager;
 	Ptr<HMDDevice>		pHMD;
 	Ptr<SensorDevice>	pSensor;
-	SensorFusion		FusionResult;
+	SensorFusion*       pFusionResult;
 	HMDInfo				hmdInfo;
 
 	OVR::Util::Render::StereoConfig stereo;
