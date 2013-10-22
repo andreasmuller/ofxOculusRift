@@ -4,6 +4,7 @@
 //
 //  Created by Andreas Müller on 30/04/2013.
 //  Updated by James George September 27th 2013
+//  Updated by Jason Walters October 22 2013
 //
 
 #include "ofxOculusRift.h"
@@ -80,10 +81,10 @@ ofxOculusRift::ofxOculusRift(){
 ofxOculusRift::~ofxOculusRift(){
 	if(bSetup){
 		pSensor.Clear();
-        pHMD.Clear();
+        	pHMD.Clear();
 		pManager.Clear();
         
-        delete pFusionResult;
+        	delete pFusionResult;
                 
 		System::Destroy();
 		bSetup = false;
@@ -100,7 +101,7 @@ bool ofxOculusRift::setup(){
 	
 	System::Init();
     
-    pFusionResult = new SensorFusion();
+    	pFusionResult = new SensorFusion();
 	pManager = *DeviceManager::Create();
 	pHMD = *pManager->EnumerateDevices<HMDDevice>().CreateDevice();
     
