@@ -82,6 +82,8 @@ ofxOculusRift::~ofxOculusRift(){
 		pSensor.Clear();
         pHMD.Clear();
 		pManager.Clear();
+        
+        delete pFusionResult;
                 
 		System::Destroy();
 		bSetup = false;
