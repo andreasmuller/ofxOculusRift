@@ -4,6 +4,7 @@
 //
 //  Created by Andreas Müller on 30/04/2013.
 //  Updated by James George September 27th 2013
+//  Updated by Jason Walters October 22 2013
 //
 
 #include "ofxOculusRift.h"
@@ -81,8 +82,12 @@ ofxOculusRift::ofxOculusRift(){
 ofxOculusRift::~ofxOculusRift(){
 	if(bSetup){
 		pSensor.Clear();
+        pHMD.Clear();
 		pManager.Clear();
-		//System::Destroy();	// causes the system to crash.
+        
+        delete pFusionResult;
+                
+		System::Destroy();
 		bSetup = false;
 	}
 }
@@ -96,8 +101,11 @@ bool ofxOculusRift::setup(){
 	}
 	
 	System::Init();
+    
+    pFusionResult = new SensorFusion();
 	pManager = *DeviceManager::Create();
 	pHMD = *pManager->EnumerateDevices<HMDDevice>().CreateDevice();
+    
 	if (pHMD == NULL){
 		ofLogError("ofxOculusRift::setup") << "HMD not found";
 		return false;
@@ -114,7 +122,7 @@ bool ofxOculusRift::setup(){
 		return false;
 	}
 	
-	if(!FusionResult.AttachToSensor(pSensor)){
+	if(!pFusionResult->AttachToSensor(pSensor)){
 		ofLogError("ofxOculusRift::setup") << "Sensor Fusion failed";
 		return false;
 	}
@@ -199,10 +207,10 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	
 	ofMatrix4x4 headRotation;
 	if(bUsePredictedOrientation){
-        headRotation = toOf(Matrix4f(FusionResult.GetPredictedOrientation()));
+	   headRotation = toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
 	}
 	else{
-		headRotation = toOf(Matrix4f(FusionResult.GetOrientation()));
+		headRotation = toOf(Matrix4f(pFusionResult->GetOrientation()));
 	}
 
 	if(baseCamera != NULL){
