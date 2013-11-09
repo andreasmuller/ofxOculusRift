@@ -143,7 +143,7 @@ bool ofxOculusRift::setup(){
 	float w = hmdInfo.HResolution;
 	float h = hmdInfo.VResolution;
 	renderTarget.allocate(w, h, GL_RGB, 8);
-    backgroundTarget.allocate(w/w, h);
+    backgroundTarget.allocate(w/2, h);
 
 	//left eye
 	leftEyeMesh.addVertex(ofVec3f(0,0,0));
