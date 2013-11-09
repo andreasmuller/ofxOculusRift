@@ -76,7 +76,6 @@ ofxOculusRift::ofxOculusRift(){
 	bSetup = false;
 	lockView = false;
 	bUsePredictedOrientation = true;
-    bBackground = false;
 }
 
 ofxOculusRift::~ofxOculusRift(){
