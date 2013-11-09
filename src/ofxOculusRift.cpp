@@ -73,8 +73,9 @@ ofRectangle toOf(const OVR::Util::Render::Viewport vp){
 ofxOculusRift::ofxOculusRift(){
 	baseCamera = NULL;
 	bSetup = false;
-	viewLock = false;
+	lockView = false;
 	bUsePredictedOrientation = true;
+    bBackground = false;
 }
 
 ofxOculusRift::~ofxOculusRift(){
@@ -135,7 +136,8 @@ bool ofxOculusRift::setup(){
 	float w = hmdInfo.HResolution;
 	float h = hmdInfo.VResolution;
 	renderTarget.allocate(w, h, GL_RGB, 8);
-	
+    backgroundTarget.allocate(w/w, h);
+
 	//left eye
 	leftEyeMesh.addVertex(ofVec3f(0,0,0));
 	leftEyeMesh.addTexCoord(ofVec2f(0,h));
@@ -178,11 +180,16 @@ bool ofxOculusRift::isSetup(){
 
 void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glDisable(GL_LIGHTING);
+	OVR::Util::Render::StereoEyeParams eyeRenderParams = stereo.GetEyeRenderParams( eye );
+	OVR::Util::Render::Viewport VP = eyeRenderParams.VP;
+    backgroundTarget.getTextureReference().draw(toOf(VP));
+    glPopAttrib();
+    
 	ofSetMatrixMode(OF_MATRIX_PROJECTION);
 	ofLoadIdentityMatrix();
 	
-	OVR::Util::Render::StereoEyeParams eyeRenderParams = stereo.GetEyeRenderParams( eye );
-	OVR::Util::Render::Viewport VP = eyeRenderParams.VP;
 	ofMatrix4x4 projectionMatrix = toOf(eyeRenderParams.Projection);
 
 	ofLoadMatrix( projectionMatrix );
@@ -192,7 +199,7 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	
 	ofMatrix4x4 headRotation;
 	if(bUsePredictedOrientation){
-	   headRotation = toOf(Matrix4f(FusionResult.GetPredictedOrientation()));
+        headRotation = toOf(Matrix4f(FusionResult.GetPredictedOrientation()));
 	}
 	else{
 		headRotation = toOf(Matrix4f(FusionResult.GetOrientation()));
@@ -227,6 +234,21 @@ void ofxOculusRift::reloadShader(){
 	
 }
 
+void ofxOculusRift::beginBackground(){
+    backgroundTarget.begin();
+    ofClear(0.0, 0.0, 0.0);
+    ofPushView();
+    ofPushMatrix();
+    ofViewport(toOf( stereo.GetEyeRenderParams(OVR::Util::Render::StereoEye_Left).VP) );
+    
+}
+
+void ofxOculusRift::endBackground(){
+    ofPopMatrix();
+    ofPopView();
+    backgroundTarget.end();
+}
+
 void ofxOculusRift::beginLeftEye(){
 	
 	if(!bSetup) return;
@@ -235,7 +257,6 @@ void ofxOculusRift::beginLeftEye(){
 	ofClear(0,0,0);
 	ofPushView();
 	ofPushMatrix();
-	
 	setupEyeParams(OVR::Util::Render::StereoEye_Left);
 	
 }

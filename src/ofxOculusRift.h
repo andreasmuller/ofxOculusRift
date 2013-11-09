@@ -36,6 +36,10 @@ class ofxOculusRift
 	bool setup();
 	bool isSetup();
 	bool lockView;
+    
+    bool bBackground;
+    void beginBackground();
+    void endBackground();
 	
 	void beginLeftEye();
 	void endLeftEye();
@@ -62,6 +66,8 @@ class ofxOculusRift
 	OVR::Util::Render::StereoConfig stereo;
 	float renderScale;
 
+    ofFbo backgroundTarget;
+    
 	ofVboMesh leftEyeMesh;
 	ofVboMesh rightEyeMesh;
 	ofFbo renderTarget;
