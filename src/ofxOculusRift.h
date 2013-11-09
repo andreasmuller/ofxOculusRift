@@ -38,7 +38,6 @@ class ofxOculusRift
 	bool isSetup();
 	bool lockView;
     
-    bool bBackground;
     void beginBackground();
     void endBackground();
 	
