@@ -55,14 +55,14 @@ void main()
         
         // Do green lookup (no scaling).
         vec2 tcGreen = LensCenter + Scale * theta1;
-        float green = texture2DRect(Texture0, tcGreen * dimensions).g;
+        vec4 center = texture2DRect(Texture0, tcGreen * dimensions);
         
         // Do red scale and lookup.
         vec2 thetaRed = theta1 * (ChromAbParam.x + ChromAbParam.y * rSq);
         vec2 tcRed = LensCenter + Scale * thetaRed;
         float red = texture2DRect(Texture0, tcRed * dimensions).r;
         
-        gl_FragColor = vec4(red, green, blue, 1);
+        gl_FragColor = vec4(red, center.g, blue, center.a);
     }
 }
                                         );
