@@ -91,6 +91,7 @@ ofxOculusRift::ofxOculusRift(){
 	bSetup = false;
 	lockView = false;
 	bUsePredictedOrientation = true;
+
 }
 
 ofxOculusRift::~ofxOculusRift(){
@@ -159,7 +160,10 @@ bool ofxOculusRift::setup(){
 	float h = hmdInfo.VResolution;
 	renderTarget.allocate(w, h, GL_RGB, 8);
     backgroundTarget.allocate(w/2, h);
-
+	backgroundTarget.begin();
+    ofClear(0.0, 0.0, 0.0);
+	backgroundTarget.end();
+	
 	//left eye
 	leftEyeMesh.addVertex(ofVec3f(0,0,0));
 	leftEyeMesh.addTexCoord(ofVec2f(0,h));
