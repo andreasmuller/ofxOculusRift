@@ -189,6 +189,8 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
+	glDisable(GL_DEPTH_TEST);
+	
 	OVR::Util::Render::StereoEyeParams eyeRenderParams = stereo.GetEyeRenderParams( eye );
 	OVR::Util::Render::Viewport VP = eyeRenderParams.VP;
     backgroundTarget.getTextureReference().draw(toOf(VP));
@@ -206,7 +208,7 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	
 	ofMatrix4x4 headRotation;
 	if(bUsePredictedOrientation){
-	   headRotation = toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
+		headRotation = toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
 	}
 	else{
 		headRotation = toOf(Matrix4f(pFusionResult->GetOrientation()));
@@ -218,7 +220,7 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	
 	// lock the camera when enabled...
 	if (!lockView) {
-        	ofLoadMatrix( ofMatrix4x4::getInverseOf( headRotation ));
+		ofLoadMatrix( ofMatrix4x4::getInverseOf( headRotation ));
 	}
 	
 	ofViewport(toOf(VP));
@@ -238,7 +240,6 @@ void ofxOculusRift::reloadShader(){
 		distortionShader.setupShaderFromSource(GL_FRAGMENT_SHADER, OculusWarpFrag);
 		distortionShader.linkProgram();
 	}
-	
 }
 
 void ofxOculusRift::beginBackground(){
