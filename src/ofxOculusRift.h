@@ -53,6 +53,8 @@ class ofxOculusRift
 	
 	void reloadShader();
 	
+	ofRectangle getOculusViewport();
+	
   private:
 	bool bSetup;
 	bool bUsePredictedOrientation;

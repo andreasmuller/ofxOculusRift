@@ -248,6 +248,11 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	
 }
 
+ofRectangle ofxOculusRift::getOculusViewport(){
+	OVR::Util::Render::StereoEyeParams eyeRenderParams = stereo.GetEyeRenderParams( OVR::Util::Render::StereoEye_Left );
+	return toOf(eyeRenderParams.VP);
+}
+
 void ofxOculusRift::reloadShader(){
 	//this allows you to hack on the shader if you'd like
 	if(ofFile("Shaders/HmdWarp.vert").exists() && ofFile("Shaders/HmdWarp.frag").exists()){
@@ -266,7 +271,7 @@ void ofxOculusRift::beginBackground(){
     ofClear(0.0, 0.0, 0.0);
     ofPushView();
     ofPushMatrix();
-    ofViewport(toOf( stereo.GetEyeRenderParams(OVR::Util::Render::StereoEye_Left).VP) );
+    ofViewport(getOculusViewport());
     
 }
 
