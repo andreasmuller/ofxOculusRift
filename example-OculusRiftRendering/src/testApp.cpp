@@ -56,18 +56,18 @@ void testApp::draw()
 	if(oculusRift.isSetup()){
 		
 		if(true || showOverlay){
-			oculusRift.beginOverlay(200);
+			oculusRift.beginOverlay(-mouseX);
 			ofPushStyle();
 			ofNoFill();
-			ofRect(oculusRift.getOculusViewport());
+			ofRect(oculusRift.getOverlayRectangle());
 			ofEnableAlphaBlending();
 			ofFill();
-			ofSetColor(255, 40, 10, 30);
-			ofRect(oculusRift.getOculusViewport());
+			ofSetColor(255, 40, 10, 200);
+			ofRect(oculusRift.getOverlayRectangle());
 			
 			ofSetColor(255);
-			ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), 20, 20);
-			ofDrawBitmapString("RIFT DEMO by James George", 20, 40);
+			ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), oculusRift.getOverlayRectangle().getCenter() + ofVec2f(-100,50) );
+			//ofDrawBitmapString("RIFT DEMO by James George", 256, 256);
 			
 			ofPopStyle();
 			oculusRift.endOverlay();

@@ -163,7 +163,7 @@ bool ofxOculusRift::setup(){
 	
 	renderTarget.allocate(w, h, GL_RGB, 4);
     backgroundTarget.allocate(w/2, h);
-    overlayTarget.allocate(w/2, h, GL_RGBA);
+    overlayTarget.allocate(512, 512, GL_RGBA);
 	
 	backgroundTarget.begin();
     ofClear(0.0, 0.0, 0.0);
@@ -305,16 +305,21 @@ void ofxOculusRift::beginOverlay(float overlayZ){
 	bUseOverlay = true;
 	overlayZDistance = overlayZ;
 	
-	ofRectangle viewport = getOculusViewport();
+	
 	overlayMesh.clear();
-	overlayMesh.addVertex( ofVec3f(0,0,overlayZ) );
-	overlayMesh.addTexCoord(viewport.getTopLeft());
-	overlayMesh.addVertex( ofVec3f(viewport.x, 0, overlayZ) );
-	overlayMesh.addTexCoord(viewport.getTopRight());
-	overlayMesh.addVertex( ofVec3f(0, viewport.y, overlayZ) );
-	overlayMesh.addTexCoord(viewport.getBottomLeft());
-	overlayMesh.addVertex( ofVec3f(viewport.x, viewport.y, overlayZ) );
-	overlayMesh.addTexCoord(viewport.getBottomRight());
+	ofRectangle overlayrect = ofRectangle(-overlayTarget.getWidth()/2,
+										  -overlayTarget.getHeight()/2,
+										  overlayTarget.getWidth(),
+										  overlayTarget.getHeight());
+	overlayMesh.addVertex( ofVec3f(overlayrect.getMinX(), overlayrect.getMinY(), overlayZ) );
+	overlayMesh.addVertex( ofVec3f(overlayrect.getMaxX(), overlayrect.getMinY(), overlayZ) );
+	overlayMesh.addVertex( ofVec3f(overlayrect.getMinX(), overlayrect.getMaxY(), overlayZ) );
+	overlayMesh.addVertex( ofVec3f(overlayrect.getMaxX(), overlayrect.getMaxY(), overlayZ) );
+
+	overlayMesh.addTexCoord( ofVec2f(0, overlayTarget.getHeight() ) );
+	overlayMesh.addTexCoord( ofVec2f(overlayTarget.getWidth(), overlayTarget.getHeight()) );
+	overlayMesh.addTexCoord( ofVec2f(0,0) );
+	overlayMesh.addTexCoord( ofVec2f(overlayTarget.getWidth(), 0) );
 	
 	overlayMesh.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
 	
@@ -323,7 +328,8 @@ void ofxOculusRift::beginOverlay(float overlayZ){
     ofClear(1.0, 0.0, 0.0);
     ofPushView();
     ofPushMatrix();
-    ofViewport(viewport);
+	
+    ofViewport(getOculusViewport());
 	
 }
 
@@ -387,13 +393,28 @@ void ofxOculusRift::renderOverlay(){
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
-
+	ofPushStyle();
+	
+	ofPushMatrix();
+	if(baseCamera != NULL){
+//		cout<< "correcting for camera position" << endl;
+		ofTranslate(baseCamera->getPosition());
+		ofMatrix4x4 baseRotation;
+		baseRotation.makeRotationMatrix(baseCamera->getOrientationQuat());
+		ofMultMatrix(orientationMatrix*baseRotation);
+		
+	}
+	
+	ofEnableAlphaBlending();
 	overlayTarget.getTextureReference().bind();
 	overlayMesh.draw();
 	overlayTarget.getTextureReference().unbind();
-//	ofSetColor(255, 255, 255);
-//	ofSphere(0, 0, 100, 1000);
 	
+//	ofSetColor(255, 255, 255);
+//	ofSphere(0, 0, 0, 20);
+	
+	ofPopMatrix();
+	ofPopStyle();
 	glPopAttrib();
 
 	
