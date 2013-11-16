@@ -57,13 +57,15 @@ class ofxOculusRift
 	void setUsePredictedOrientation(bool usePredicted);
 	
 	void reloadShader();
-
+    
 	ofRectangle getOverlayRectangle() {return ofRectangle(0,0,overlayTarget.getWidth(), overlayTarget.getHeight()); }
 	ofFbo& getOverlayTarget(){ return overlayTarget; }
 	ofFbo& getBackgroundTarget(){ return backgroundTarget; }
 	
 	ofRectangle getOculusViewport();
-	
+
+    ofVec3f screenToWorld(ofVec3f screenPt);
+
   private:
 	bool bSetup;
 	bool bUsePredictedOrientation;

@@ -36,4 +36,7 @@ class testApp : public ofBaseApp
 	ofEasyCam			cam;
 	bool showOverlay;
 	vector<DemoSphere> demos;
+    
+    ofVec3f cursor2D;
+    ofVec3f cursor3D;
 };

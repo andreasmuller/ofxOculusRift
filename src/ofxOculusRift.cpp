@@ -500,4 +500,21 @@ void ofxOculusRift::setUsePredictedOrientation(bool usePredicted){
 	bUsePredictedOrientation = usePredicted;
 }
 
+ofVec3f ofxOculusRift::screenToWorld(ofVec3f screenPt)
+{
+    // Map the 2D coordinate to the Oculus viewport.
+    ofRectangle screenViewport = ofGetCurrentViewport();
+    ofRectangle oculusViewport = getOculusViewport();
+    ofVec3f oculusScreenPt(ofMap(screenPt.x, screenViewport.getMinX(), screenViewport.getMaxX(), oculusViewport.getMinX(), oculusViewport.getMaxX()),
+                           ofMap(screenPt.y, screenViewport.getMinY(), screenViewport.getMaxY(), oculusViewport.getMinY(), oculusViewport.getMaxY()),
+                           screenPt.z);
+    
+    // Adjust the viewport for the two eye thing.
+    oculusViewport.x -= oculusViewport.width / 2;
+    
+    // Map the new 2D coordinate to the Oculus world and return it.
+    // TODO: What if there's no base camera?
+    return baseCamera->screenToWorld(oculusScreenPt, oculusViewport);
+}
+
 

@@ -72,6 +72,8 @@ void testApp::draw()
 			ofPopStyle();
 			oculusRift.endOverlay();
 		}
+        
+        cursor3D = oculusRift.screenToWorld(cursor2D);
 		
 		oculusRift.beginLeftEye();
 		drawScene();
@@ -120,6 +122,9 @@ void testApp::drawScene()
 	}
 		
 	ofPopStyle();
+    
+    ofSetColor(255, 0, 0);
+    ofCircle(cursor3D, 2);
 }
 
 //--------------------------------------------------------------
@@ -153,13 +158,13 @@ void testApp::keyReleased(int key)
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y)
 {
-
+    cursor2D.set(x, y, cursor2D.z);
 }
 
 //--------------------------------------------------------------
 void testApp::mouseDragged(int x, int y, int button)
 {
-
+    cursor2D.set(x, y, cursor2D.z);
 }
 
 //--------------------------------------------------------------
