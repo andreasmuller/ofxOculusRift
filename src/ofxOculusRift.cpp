@@ -412,13 +412,36 @@ void ofxOculusRift::renderOverlay(){
 
 ofVec3f ofxOculusRift::worldToScreen(ofVec3f worldPosition, bool considerHeadOrientation){
 	//TODO head orientation not considered
-	if(baseCamera != NULL){
+	if(baseCamera == NULL){
 		ofRectangle viewport = getOculusViewport();
-		viewport.x -= viewport.width/2;
+		viewport.x -= viewport.width / 2;
 		return baseCamera->worldToScreen(worldPosition, viewport);
 	}
 	return ofVec3f(0,0,0);
 }
+
+
+ofVec3f ofxOculusRift::screenToWorld(ofVec3f screenPt, bool considerHeadOrientation) {
+	
+	if(baseCamera == NULL){
+		return ofVec3f(0,0,0);
+	}
+	
+    // Map the 2D coordinate to the Oculus viewport.
+//    ofRectangle screenViewport = ofGetCurrentViewport();
+    ofRectangle oculusViewport = getOculusViewport();
+    ofVec3f oculusScreenPt(ofMap(screenPt.x, 0, ofGetWidth(), oculusViewport.getMinX(), oculusViewport.getMaxX()),
+                           ofMap(screenPt.y, 0, ofGetHeight(), oculusViewport.getMinY(), oculusViewport.getMaxY()),
+                           screenPt.z);
+    
+    // Adjust the viewport for the two eye thing.
+    oculusViewport.x -= oculusViewport.width / 2;
+    
+    // Map the new 2D coordinate to the Oculus world and return it.
+    // TODO: What if there's no base camera?
+    return baseCamera->screenToWorld(oculusScreenPt, oculusViewport);
+}
+
 
 void ofxOculusRift::draw(){
 	

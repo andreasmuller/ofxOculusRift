@@ -58,9 +58,11 @@ class ofxOculusRift
 	
 	void reloadShader();
 
+
 	//projects a 3D point into 2D, optionally accounting for the head orientation
 	ofVec3f worldToScreen(ofVec3f worldPosition, bool considerHeadOrientation = true);
-	
+	ofVec3f screenToWorld(ofVec3f screenPt, bool considerHeadOrientation = true);
+
 	
 	ofRectangle getOverlayRectangle() {
 		return ofRectangle(0,0,
@@ -75,7 +77,8 @@ class ofxOculusRift
 	}
 	
 	ofRectangle getOculusViewport();
-	
+
+
   private:
 	bool bSetup;
 	bool bUsePredictedOrientation;
