@@ -38,9 +38,14 @@ class ofxOculusRift
 	bool isSetup();
 	bool lockView;
     
+	//draw background, before rendering eyes
     void beginBackground();
     void endBackground();
-	
+
+	//draw overlay, before rendering eyes
+	void beginOverlay(float overlayZDistance = 10);
+    void endOverlay();
+
 	void beginLeftEye();
 	void endLeftEye();
 	
@@ -53,12 +58,17 @@ class ofxOculusRift
 	
 	void reloadShader();
 	
+	ofFbo& getOverlayTarget(){ return overlayTarget; };
+	ofFbo& getBackgroundTarget(){ return backgroundTarget; }
+	
 	ofRectangle getOculusViewport();
 	
   private:
 	bool bSetup;
 	bool bUsePredictedOrientation;
-	
+	bool bUseBackground;
+	bool bUseOverlay;
+	float overlayZDistance;
 	Ptr<DeviceManager>	pManager;
 	Ptr<HMDDevice>		pHMD;
 	Ptr<SensorDevice>	pSensor;
@@ -67,15 +77,18 @@ class ofxOculusRift
 
 	OVR::Util::Render::StereoConfig stereo;
 	float renderScale;
-
-    ofFbo backgroundTarget;
-    
+	ofMesh overlayMesh;
+	ofMatrix4x4 orientationMatrix;
+	
 	ofVboMesh leftEyeMesh;
 	ofVboMesh rightEyeMesh;
 	ofFbo renderTarget;
+    ofFbo backgroundTarget;
+	ofFbo overlayTarget;
 	ofShader distortionShader;
 
 	void setupEyeParams(OVR::Util::Render::StereoEye eye);
 	void setupShaderUniforms(OVR::Util::Render::StereoEye eye);
 	
+	void renderOverlay();
 };

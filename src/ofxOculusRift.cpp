@@ -91,7 +91,9 @@ ofxOculusRift::ofxOculusRift(){
 	bSetup = false;
 	lockView = false;
 	bUsePredictedOrientation = true;
-
+	bUseOverlay = false;
+	bUseBackground = false;
+	overlayZDistance = 10;
 }
 
 ofxOculusRift::~ofxOculusRift(){
@@ -158,11 +160,18 @@ bool ofxOculusRift::setup(){
 	//account for render scale?
 	float w = hmdInfo.HResolution;
 	float h = hmdInfo.VResolution;
-	renderTarget.allocate(w, h, GL_RGB, 8);
+	
+	renderTarget.allocate(w, h, GL_RGB, 4);
     backgroundTarget.allocate(w/2, h);
+    overlayTarget.allocate(w/2, h, GL_RGBA);
+	
 	backgroundTarget.begin();
     ofClear(0.0, 0.0, 0.0);
 	backgroundTarget.end();
+	
+	overlayTarget.begin();
+	ofClear(0.0, 0.0, 0.0);
+	overlayTarget.end();
 	
 	//left eye
 	leftEyeMesh.addVertex(ofVec3f(0,0,0));
@@ -205,16 +214,18 @@ bool ofxOculusRift::isSetup(){
 }
 
 void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
-
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glDisable(GL_LIGHTING);
-	glDisable(GL_DEPTH_TEST);
 	
 	OVR::Util::Render::StereoEyeParams eyeRenderParams = stereo.GetEyeRenderParams( eye );
 	OVR::Util::Render::Viewport VP = eyeRenderParams.VP;
-    backgroundTarget.getTextureReference().draw(toOf(VP));
-    glPopAttrib();
-    
+
+	if(bUseBackground){
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_DEPTH_TEST);
+		backgroundTarget.getTextureReference().draw(toOf(VP));
+		glPopAttrib();
+	}
+	
 	ofSetMatrixMode(OF_MATRIX_PROJECTION);
 	ofLoadIdentityMatrix();
 	
@@ -225,16 +236,22 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	ofSetMatrixMode(OF_MATRIX_MODELVIEW);
 	ofLoadIdentityMatrix();
 	
-	ofMatrix4x4 headRotation;
+	
 	if(bUsePredictedOrientation){
-		headRotation = toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
+		//headRotation = toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
+		orientationMatrix = toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
 	}
 	else{
-		headRotation = toOf(Matrix4f(pFusionResult->GetOrientation()));
+		//headRotation = toOf(Matrix4f(pFusionResult->GetOrientation()));
+		orientationMatrix = toOf(Matrix4f(pFusionResult->GetOrientation()));
 	}
-
+	
+	ofMatrix4x4 headRotation = orientationMatrix;
 	if(baseCamera != NULL){
 		headRotation = headRotation * baseCamera->getGlobalTransformMatrix();
+		baseCamera->begin();
+		baseCamera->end();
+
 	}
 	
 	// lock the camera when enabled...
@@ -266,7 +283,9 @@ void ofxOculusRift::reloadShader(){
 	}
 }
 
+
 void ofxOculusRift::beginBackground(){
+	bUseBackground = true;
     backgroundTarget.begin();
     ofClear(0.0, 0.0, 0.0);
     ofPushView();
@@ -281,6 +300,39 @@ void ofxOculusRift::endBackground(){
     backgroundTarget.end();
 }
 
+
+void ofxOculusRift::beginOverlay(float overlayZ){
+	bUseOverlay = true;
+	overlayZDistance = overlayZ;
+	
+	ofRectangle viewport = getOculusViewport();
+	overlayMesh.clear();
+	overlayMesh.addVertex( ofVec3f(0,0,overlayZ) );
+	overlayMesh.addTexCoord(viewport.getTopLeft());
+	overlayMesh.addVertex( ofVec3f(viewport.x, 0, overlayZ) );
+	overlayMesh.addTexCoord(viewport.getTopRight());
+	overlayMesh.addVertex( ofVec3f(0, viewport.y, overlayZ) );
+	overlayMesh.addTexCoord(viewport.getBottomLeft());
+	overlayMesh.addVertex( ofVec3f(viewport.x, viewport.y, overlayZ) );
+	overlayMesh.addTexCoord(viewport.getBottomRight());
+	
+	overlayMesh.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
+	
+	overlayTarget.begin();
+
+    ofClear(1.0, 0.0, 0.0);
+    ofPushView();
+    ofPushMatrix();
+    ofViewport(viewport);
+	
+}
+
+void ofxOculusRift::endOverlay(){
+    ofPopMatrix();
+    ofPopView();
+    overlayTarget.end();
+}
+
 void ofxOculusRift::beginLeftEye(){
 	
 	if(!bSetup) return;
@@ -289,12 +341,15 @@ void ofxOculusRift::beginLeftEye(){
 	ofClear(0,0,0);
 	ofPushView();
 	ofPushMatrix();
-	setupEyeParams(OVR::Util::Render::StereoEye_Left);
-	
+	setupEyeParams(OVR::Util::Render::StereoEye_Left);	
 }
 
 void ofxOculusRift::endLeftEye(){
 	if(!bSetup) return;
+	
+	if(bUseOverlay){
+		renderOverlay();
+	}
 	
 	ofPopMatrix();
 	ofPopView();
@@ -312,9 +367,36 @@ void ofxOculusRift::beginRightEye(){
 void ofxOculusRift::endRightEye(){
 	if(!bSetup) return;
 
+	if(bUseOverlay){
+		renderOverlay();
+	}
+
 	ofPopMatrix();
 	ofPopView();
 	renderTarget.end();	
+}
+
+void ofxOculusRift::renderOverlay(){
+	if(!lockView){
+		//load head rotation
+		//ofMultMatrix( orientationMatrix.getInverse() );
+	}
+	
+//	cout << "renering overlay!" << endl;
+	
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_DEPTH_TEST);
+
+	overlayTarget.getTextureReference().bind();
+	overlayMesh.draw();
+	overlayTarget.getTextureReference().unbind();
+//	ofSetColor(255, 255, 255);
+//	ofSphere(0, 0, 100, 1000);
+	
+	glPopAttrib();
+
+	
 }
 
 void ofxOculusRift::draw(){
@@ -342,6 +424,9 @@ void ofxOculusRift::draw(){
 	rightEyeMesh.draw();
 
 	distortionShader.end();
+	
+	bUseOverlay = false;
+	bUseBackground = false;
 }
 
 void ofxOculusRift::setupShaderUniforms(OVR::Util::Render::StereoEye eye){

@@ -34,6 +34,6 @@ class testApp : public ofBaseApp
 
 	ofLight				light;
 	ofEasyCam			cam;
-
+	bool showOverlay;
 	vector<DemoSphere> demos;
 };
