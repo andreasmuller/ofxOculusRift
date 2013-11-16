@@ -52,27 +52,39 @@ void testApp::draw()
 {
 
 	
-	glEnable(GL_DEPTH_TEST);
 	if(oculusRift.isSetup()){
 		
 		if(true || showOverlay){
-			oculusRift.beginOverlay(-mouseX);
+			
+//			glDisable(GL_DEPTH_TEST);
+			
+			oculusRift.beginOverlay(-150);
+			ofRectangle overlayRect = oculusRift.getOverlayRectangle();
+			
 			ofPushStyle();
-			ofNoFill();
-			ofRect(oculusRift.getOverlayRectangle());
 			ofEnableAlphaBlending();
 			ofFill();
 			ofSetColor(255, 40, 10, 200);
-			ofRect(oculusRift.getOverlayRectangle());
+			ofRect(overlayRect.x,
+				   overlayRect.y,
+				   overlayRect.width*.75,
+				   overlayRect.height*.75);
 			
-			ofSetColor(255);
-			ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), oculusRift.getOverlayRectangle().getCenter() + ofVec2f(-100,50) );
+			ofSetColor(255,255);
+			ofRect(overlayRect.getCenter().x-10,
+				   overlayRect.getCenter().y-10,
+				   20,20);
+//
+			
+			ofFill();
+			ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), overlayRect.getCenter()  );
 			//ofDrawBitmapString("RIFT DEMO by James George", 256, 256);
 			
 			ofPopStyle();
 			oculusRift.endOverlay();
 		}
 		
+		glEnable(GL_DEPTH_TEST);
 		oculusRift.beginLeftEye();
 		drawScene();
 		oculusRift.endLeftEye();
@@ -84,11 +96,6 @@ void testApp::draw()
 		oculusRift.draw();
 		
 		glDisable(GL_DEPTH_TEST);
-		//TEST
-//		ofSetColor(255, 0, 0);
-//		ofDisableAlphaBlending();
-//		cout << "overlay target " << oculusRift.getOverlayTarget().getWidth() << " " << oculusRift.getOverlayTarget().getHeight() << endl;
-//		oculusRift.getOverlayTarget().draw(0, 0);
 	}
 	else{
 		cam.begin();

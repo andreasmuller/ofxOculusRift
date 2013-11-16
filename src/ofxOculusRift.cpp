@@ -18,9 +18,7 @@ void main()
 {
 	oTexCoord = gl_MultiTexCoord0.xy / dimensions;
 	gl_Position = ftransform();
-}
-
-										 );
+});
 
 static const char* OculusWarpFrag = GLSL(120,
 uniform vec2 LensCenter;
@@ -163,7 +161,7 @@ bool ofxOculusRift::setup(){
 	
 	renderTarget.allocate(w, h, GL_RGB, 4);
     backgroundTarget.allocate(w/2, h);
-    overlayTarget.allocate(512, 512, GL_RGBA);
+    overlayTarget.allocate(256, 256, GL_RGBA);
 	
 	backgroundTarget.begin();
     ofClear(0.0, 0.0, 0.0);
@@ -301,25 +299,25 @@ void ofxOculusRift::endBackground(){
 }
 
 
-void ofxOculusRift::beginOverlay(float overlayZ){
+void ofxOculusRift::beginOverlay(float overlayZ, float width, float height){
 	bUseOverlay = true;
 	overlayZDistance = overlayZ;
 	
+	if(overlayTarget.getWidth() != width || overlayTarget.getHeight() != height){
+		overlayTarget.allocate(width, height, GL_RGBA, 4);
+	}
 	
 	overlayMesh.clear();
-	ofRectangle overlayrect = ofRectangle(-overlayTarget.getWidth()/2,
-										  -overlayTarget.getHeight()/2,
-										  overlayTarget.getWidth(),
-										  overlayTarget.getHeight());
+	ofRectangle overlayrect = ofRectangle(-width/2,-height/2,width,height);
 	overlayMesh.addVertex( ofVec3f(overlayrect.getMinX(), overlayrect.getMinY(), overlayZ) );
 	overlayMesh.addVertex( ofVec3f(overlayrect.getMaxX(), overlayrect.getMinY(), overlayZ) );
 	overlayMesh.addVertex( ofVec3f(overlayrect.getMinX(), overlayrect.getMaxY(), overlayZ) );
 	overlayMesh.addVertex( ofVec3f(overlayrect.getMaxX(), overlayrect.getMaxY(), overlayZ) );
 
-	overlayMesh.addTexCoord( ofVec2f(0, overlayTarget.getHeight() ) );
-	overlayMesh.addTexCoord( ofVec2f(overlayTarget.getWidth(), overlayTarget.getHeight()) );
+	overlayMesh.addTexCoord( ofVec2f(0, height ) );
+	overlayMesh.addTexCoord( ofVec2f(width, height) );
 	overlayMesh.addTexCoord( ofVec2f(0,0) );
-	overlayMesh.addTexCoord( ofVec2f(overlayTarget.getWidth(), 0) );
+	overlayMesh.addTexCoord( ofVec2f(width, 0) );
 	
 	overlayMesh.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
 	
@@ -330,7 +328,6 @@ void ofxOculusRift::beginOverlay(float overlayZ){
     ofPushMatrix();
 	
     ofViewport(getOculusViewport());
-	
 }
 
 void ofxOculusRift::endOverlay(){
@@ -397,30 +394,34 @@ void ofxOculusRift::renderOverlay(){
 	
 	ofPushMatrix();
 	if(baseCamera != NULL){
-//		cout<< "correcting for camera position" << endl;
 		ofTranslate(baseCamera->getPosition());
 		ofMatrix4x4 baseRotation;
 		baseRotation.makeRotationMatrix(baseCamera->getOrientationQuat());
 		ofMultMatrix(orientationMatrix*baseRotation);
-		
 	}
 	
 	ofEnableAlphaBlending();
 	overlayTarget.getTextureReference().bind();
 	overlayMesh.draw();
 	overlayTarget.getTextureReference().unbind();
-	
-//	ofSetColor(255, 255, 255);
-//	ofSphere(0, 0, 0, 20);
-	
+		
 	ofPopMatrix();
 	ofPopStyle();
 	glPopAttrib();
+}
 
-	
+ofVec3f ofxOculusRift::worldToScreen(ofVec3f worldPosition, bool considerHeadOrientation){
+	//TODO head orientation not considered
+	if(baseCamera != NULL){
+		ofRectangle viewport = getOculusViewport();
+		viewport.x -= viewport.width/2;
+		return baseCamera->worldToScreen(worldPosition, viewport);
+	}
+	return ofVec3f(0,0,0);
 }
 
 void ofxOculusRift::draw(){
+	
 	if(!bSetup) return;
 	
 	distortionShader.begin();
@@ -482,6 +483,7 @@ void ofxOculusRift::setupShaderUniforms(OVR::Util::Render::StereoEye eye){
     // once we have asymmetric input texture scale.
     float scaleFactor = 1.0f / distortionConfig.Scale;
 	//	cout << "scale factor " << scaleFactor << endl;
+	
 	ofVec2f scale( (w/2) * scaleFactor, (h/2) * scaleFactor * as);
 	ofVec2f scaleIn( (2/w), (2/h) / as);
 	
