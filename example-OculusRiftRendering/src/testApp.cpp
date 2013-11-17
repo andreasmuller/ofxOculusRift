@@ -6,6 +6,8 @@ void testApp::setup()
 	ofBackground(0);
 	ofSetLogLevel( OF_LOG_VERBOSE );
 	ofSetVerticalSync( true );
+//    ofSetWindowPosition(1920, 0);
+//    ofToggleFullscreen();
 	showOverlay = false;
 	
 //	ofHideCursor();
@@ -13,7 +15,7 @@ void testApp::setup()
 	oculusRift.baseCamera = &cam;
 	oculusRift.setup();
 	
-	for(int i = 0; i < 100; i++){
+	for(int i = 0; i < 1; i++){
 		DemoSphere d;
 		d.color = ofColor(ofRandom(255),
 						  ofRandom(255),
@@ -27,6 +29,9 @@ void testApp::setup()
 		d.floatPos.z = d.pos.z;
 		
 		d.radius = ofRandom(2, 50);
+        
+        d.bHighlighted = false;
+        
 		demos.push_back(d);
 	}
 	
@@ -40,12 +45,23 @@ void testApp::setup()
 void testApp::update()
 {
 	for(int i = 0; i < demos.size(); i++){
-		demos[i].floatPos.y = ofSignedNoise(ofGetElapsedTimef()/10.0,
-									  demos[i].pos.x/100.0,
-									  demos[i].pos.z/100.0,
-									  demos[i].radius*100.0) * demos[i].radius*20.;
+//		demos[i].floatPos.y = ofSignedNoise(ofGetElapsedTimef()/10.0,
+//									  demos[i].pos.x/100.0,
+//									  demos[i].pos.z/100.0,
+//									  demos[i].radius*100.0) * demos[i].radius*20.;
 		
 	}
+    
+    if(oculusRift.isSetup()){
+        cursor3D = oculusRift.screenToWorld(cursor2D);
+		
+        // Check for collisions with cursor.
+        cursorRift = oculusRift.screenToOculus2D(cursor2D);
+        for(int i = 0; i < demos.size(); i++){
+            demoRift = oculusRift.worldToScreen(demos[i].floatPos);
+            cout << "distance = " << ofDist(cursorRift.x, cursorRift.y, demoRift.x, demoRift.y) << endl;
+        }
+    }
 }
 
 
@@ -86,8 +102,6 @@ void testApp::draw()
 			oculusRift.endOverlay();
 		}
         
-        cursor3D = oculusRift.screenToWorld(cursor2D);
-		
 		glEnable(GL_DEPTH_TEST);
 		oculusRift.beginLeftEye();
 		drawScene();
@@ -107,6 +121,13 @@ void testApp::draw()
 		cam.end();
 	}
 	
+    ofTranslate(ofGetWidth() / 2, ofGetHeight() / 2);
+    ofSetColor(255, 0, 0);
+    ofCircle(cursorRift.x, cursorRift.y, 20);
+    ofSetColor(0, 255, 0);
+    ofCircle(demoRift.x, demoRift.y, 20);
+    ofSetColor(0, 0, 255);
+    ofLine(cursorRift.x, cursorRift.y, demoRift.x, demoRift.y);
 }
 
 //--------------------------------------------------------------
@@ -122,10 +143,10 @@ void testApp::drawScene()
 	ofNoFill();
 	for(int i = 0; i < demos.size(); i++){
 		ofPushMatrix();
-		ofRotate(ofGetElapsedTimef()*(50-demos[i].radius), 0, 1, 0);
+//		ofRotate(ofGetElapsedTimef()*(50-demos[i].radius), 0, 1, 0);
 		ofTranslate(demos[i].floatPos);
-		ofRotate(ofGetElapsedTimef()*4*(50-demos[i].radius), 0, 1, 0);
-		ofSetColor(demos[i].color);
+//		ofRotate(ofGetElapsedTimef()*4*(50-demos[i].radius), 0, 1, 0);
+		ofSetColor(demos[i].bHighlighted? ofColor::white : demos[i].color);
 		ofSphere(demos[i].radius);
 		ofPopMatrix();
 	}

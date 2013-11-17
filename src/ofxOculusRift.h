@@ -62,6 +62,7 @@ class ofxOculusRift
 	//projects a 3D point into 2D, optionally accounting for the head orientation
 	ofVec3f worldToScreen(ofVec3f worldPosition, bool considerHeadOrientation = true);
 	ofVec3f screenToWorld(ofVec3f screenPt, bool considerHeadOrientation = true);
+    ofVec3f screenToOculus2D(ofVec3f screenPt, bool considerHeadOrientation = true);
 
 	
 	ofRectangle getOverlayRectangle() {
