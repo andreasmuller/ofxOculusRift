@@ -8,6 +8,8 @@ void testApp::setup()
 	ofSetVerticalSync( true );
 	showOverlay = false;
 	
+//	ofHideCursor();
+	
 	oculusRift.baseCamera = &cam;
 	oculusRift.setup();
 	
@@ -54,7 +56,7 @@ void testApp::draw()
 	
 	if(oculusRift.isSetup()){
 		
-		if(true || showOverlay){
+		if(showOverlay){
 			
 //			glDisable(GL_DEPTH_TEST);
 			
@@ -127,11 +129,11 @@ void testApp::drawScene()
 		ofSphere(demos[i].radius);
 		ofPopMatrix();
 	}
+    ofSetColor(255, 0, 0);
+    ofCircle(cursor3D, 1);
 		
 	ofPopStyle();
     
-    ofSetColor(255, 0, 0);
-    ofCircle(cursor3D, 2);
 }
 
 //--------------------------------------------------------------
