@@ -15,7 +15,7 @@ void testApp::setup()
 	oculusRift.baseCamera = &cam;
 	oculusRift.setup();
 	
-	for(int i = 0; i < 1; i++){
+	for(int i = 0; i < 20; i++){
 		DemoSphere d;
 		d.color = ofColor(ofRandom(255),
 						  ofRandom(255),
@@ -45,10 +45,10 @@ void testApp::setup()
 void testApp::update()
 {
 	for(int i = 0; i < demos.size(); i++){
-//		demos[i].floatPos.y = ofSignedNoise(ofGetElapsedTimef()/10.0,
-//									  demos[i].pos.x/100.0,
-//									  demos[i].pos.z/100.0,
-//									  demos[i].radius*100.0) * demos[i].radius*20.;
+		demos[i].floatPos.y = ofSignedNoise(ofGetElapsedTimef()/10.0,
+									  demos[i].pos.x/100.0,
+									  demos[i].pos.z/100.0,
+									  demos[i].radius*100.0) * demos[i].radius*20.;
 		
 	}
     
@@ -59,7 +59,8 @@ void testApp::update()
         cursorRift = oculusRift.screenToOculus2D(cursor2D);
         for(int i = 0; i < demos.size(); i++){
             demoRift = oculusRift.worldToScreen(demos[i].floatPos);
-            cout << "distance = " << ofDist(cursorRift.x, cursorRift.y, demoRift.x, demoRift.y) << endl;
+            float dist = ofDist(cursorRift.x, cursorRift.y, demoRift.x, demoRift.y);
+            demos[i].bHighlighted = (dist < 50);
         }
     }
 }
