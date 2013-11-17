@@ -412,7 +412,7 @@ void ofxOculusRift::renderOverlay(){
 
 ofVec3f ofxOculusRift::worldToScreen(ofVec3f worldPosition, bool considerHeadOrientation){
 	//TODO head orientation not considered
-	if(baseCamera != NULL){
+	if(baseCamera == NULL){
 		return ofVec3f(0,0,0);
 	}
 	ofRectangle viewport = getOculusViewport();
