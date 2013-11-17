@@ -418,9 +418,7 @@ ofVec3f ofxOculusRift::worldToScreen(ofVec3f worldPosition, bool considerHeadOri
 	ofRectangle viewport = getOculusViewport();
 	viewport.x -= viewport.width / 2;
 	return baseCamera->worldToScreen(worldPosition, viewport);
-
 }
-
 
 ofVec3f ofxOculusRift::screenToWorld(ofVec3f screenPt, bool considerHeadOrientation) {
 	//TODO head orientation not considered
@@ -442,7 +440,6 @@ ofVec3f ofxOculusRift::screenToOculus2D(ofVec3f screenPt, bool considerHeadOrien
                    ofMap(screenPt.y, 0, ofGetHeight(), viewport.getMinY(), viewport.getMaxY()),
                    screenPt.z);    
 }
-
 
 
 void ofxOculusRift::draw(){

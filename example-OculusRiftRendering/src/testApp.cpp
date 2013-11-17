@@ -10,7 +10,7 @@ void testApp::setup()
 //    ofToggleFullscreen();
 	showOverlay = false;
 	
-//	ofHideCursor();
+	ofHideCursor();
 	
 	oculusRift.baseCamera = &cam;
 	oculusRift.setup();
@@ -121,13 +121,6 @@ void testApp::draw()
 		cam.end();
 	}
 	
-    ofTranslate(ofGetWidth() / 2, ofGetHeight() / 2);
-    ofSetColor(255, 0, 0);
-    ofCircle(cursorRift.x, cursorRift.y, 20);
-    ofSetColor(0, 255, 0);
-    ofCircle(demoRift.x, demoRift.y, 20);
-    ofSetColor(0, 0, 255);
-    ofLine(cursorRift.x, cursorRift.y, demoRift.x, demoRift.y);
 }
 
 //--------------------------------------------------------------
@@ -151,8 +144,20 @@ void testApp::drawScene()
 		ofPopMatrix();
 	}
     ofSetColor(255, 0, 0);
-    ofCircle(cursor3D, 1);
-		
+	
+	ofPushMatrix();
+	ofNode n;
+	n.setPosition(cursor3D);
+	n.lookAt(cam.getPosition());
+	ofVec3f axis; float angle;
+    n.getOrientationQuat().getRotate(angle, axis);
+    // Translate the object to its position.
+    ofTranslate(cursor3D);
+    // Perform the rotation.
+    ofRotate(angle, axis.x, axis.y, axis.z);
+    ofCircle(0,0, 1);
+	ofPopMatrix();
+	
 	ofPopStyle();
     
 }
