@@ -71,9 +71,7 @@ void testApp::draw()
 		
 		if(showOverlay){
 			
-//			glDisable(GL_DEPTH_TEST);
-			
-			oculusRift.beginOverlay(-200);
+			oculusRift.beginOverlay(-230, 320,240);
 			ofRectangle overlayRect = oculusRift.getOverlayRectangle();
 			
 			ofPushStyle();
@@ -84,11 +82,9 @@ void testApp::draw()
 			ofRect(overlayRect);
 			
 			ofSetColor(255,255);
-//
-			
 			ofFill();
-			ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), overlayRect.getCenter()  );
-			//ofDrawBitmapString("RIFT DEMO by James George", 256, 256);
+			ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), 40, 40  );
+			ofDrawBitmapString("ofxOculusRift by\nAndreas Muller\nJames George\nJason Walters\nElie Zananiri", 20, 40);
 			
 			ofPopStyle();
 			oculusRift.endOverlay();
