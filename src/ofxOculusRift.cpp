@@ -91,7 +91,8 @@ ofxOculusRift::ofxOculusRift(){
 	bUsePredictedOrientation = true;
 	bUseOverlay = false;
 	bUseBackground = false;
-	overlayZDistance = 10;
+	overlayZDistance = -200;
+	oculusScreenSpaceScale = 2;
 }
 
 ofxOculusRift::~ofxOculusRift(){
@@ -327,7 +328,7 @@ void ofxOculusRift::beginOverlay(float overlayZ, float width, float height){
     ofPushView();
     ofPushMatrix();
 	
-    ofViewport(getOculusViewport());
+    //ofViewport(getOculusViewport());
 }
 
 void ofxOculusRift::endOverlay(){
@@ -380,67 +381,92 @@ void ofxOculusRift::endRightEye(){
 }
 
 void ofxOculusRift::renderOverlay(){
-	if(!lockView){
-		//load head rotation
-		//ofMultMatrix( orientationMatrix.getInverse() );
-	}
-	
+
 //	cout << "renering overlay!" << endl;
 	
+	ofPushStyle();
+	ofPushMatrix();
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
-	ofPushStyle();
 	
-	ofPushMatrix();
 	if(baseCamera != NULL){
 		ofTranslate(baseCamera->getPosition());
 		ofMatrix4x4 baseRotation;
 		baseRotation.makeRotationMatrix(baseCamera->getOrientationQuat());
-		ofMultMatrix(orientationMatrix*baseRotation);
+		if(lockView){
+			ofMultMatrix(baseRotation);
+		}
+		else {
+			ofMultMatrix(orientationMatrix*baseRotation);
+		}
 	}
 	
 	ofEnableAlphaBlending();
 	overlayTarget.getTextureReference().bind();
 	overlayMesh.draw();
 	overlayTarget.getTextureReference().unbind();
-		
+	
+	glPopAttrib();
 	ofPopMatrix();
 	ofPopStyle();
-	glPopAttrib();
+
 }
 
+//TODO head orientation not considered
 ofVec3f ofxOculusRift::worldToScreen(ofVec3f worldPosition, bool considerHeadOrientation){
-	//TODO head orientation not considered
+
 	if(baseCamera == NULL){
 		return ofVec3f(0,0,0);
 	}
 	ofRectangle viewport = getOculusViewport();
-	viewport.x -= viewport.width / 2;
 	return baseCamera->worldToScreen(worldPosition, viewport);
 }
 
+//TODO head orientation not considered
 ofVec3f ofxOculusRift::screenToWorld(ofVec3f screenPt, bool considerHeadOrientation) {
-	//TODO head orientation not considered
+
 	if(baseCamera == NULL){
 		return ofVec3f(0,0,0);
 	}
     
     ofVec3f oculus2DPt = screenToOculus2D(screenPt, considerHeadOrientation);
     ofRectangle viewport = getOculusViewport();
-    viewport.x -= viewport.width / 2;
     return baseCamera->screenToWorld(oculus2DPt, viewport);
 }
 
-ofVec3f ofxOculusRift::screenToOculus2D(ofVec3f screenPt, bool considerHeadOrientation)
-{
-    //TODO head orientation not considered
+//TODO head orientation not considered
+ofVec3f ofxOculusRift::screenToOculus2D(ofVec3f screenPt, bool considerHeadOrientation){
+
 	ofRectangle viewport = getOculusViewport();
+//  viewport.x -= viewport.width  / 2;
+//	viewport.y -= viewport.height / 2;
+	viewport.scaleFromCenter(oculusScreenSpaceScale);
     return ofVec3f(ofMap(screenPt.x, 0, ofGetWidth(),  viewport.getMinX(), viewport.getMaxX()),
                    ofMap(screenPt.y, 0, ofGetHeight(), viewport.getMinY(), viewport.getMaxY()),
                    screenPt.z);    
 }
 
+//TODO: head position!
+ofVec3f ofxOculusRift::mousePosition3D(float z, bool considerHeadOrientation){
+//	ofVec3f cursor3D = screenToWorld(cursor2D);
+	return screenToWorld(ofVec3f(ofGetMouseX(), ofGetMouseY(), z) );
+}
+
+float ofxOculusRift::distanceFromMouse(ofVec3f worldPoint){
+	//map the current 2D position into oculus space
+	return distanceFromScreenPoint(worldPoint, ofVec3f(ofGetMouseX(), ofGetMouseY()) );
+}
+
+float ofxOculusRift::distanceFromScreenPoint(ofVec3f worldPoint, ofVec2f screenPoint){
+	ofVec3f cursorRiftSpace = screenToOculus2D(screenPoint);
+	ofVec3f targetRiftSpace = worldToScreen(worldPoint);
+	
+	float dist = ofDist(cursorRiftSpace.x, cursorRiftSpace.y,
+						targetRiftSpace.x, targetRiftSpace.y);
+	return dist;
+	
+}
 
 void ofxOculusRift::draw(){
 	

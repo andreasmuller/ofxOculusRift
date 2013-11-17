@@ -53,13 +53,9 @@ void testApp::update()
 	}
     
     if(oculusRift.isSetup()){
-        cursor3D = oculusRift.screenToWorld(cursor2D);
 		
-        // Check for collisions with cursor.
-        cursorRift = oculusRift.screenToOculus2D(cursor2D);
         for(int i = 0; i < demos.size(); i++){
-            demoRift = oculusRift.worldToScreen(demos[i].floatPos);
-            float dist = ofDist(cursorRift.x, cursorRift.y, demoRift.x, demoRift.y);
+			float dist = oculusRift.distanceFromMouse( demos[i].floatPos );
             demos[i].bHighlighted = (dist < 50);
         }
     }
@@ -77,22 +73,17 @@ void testApp::draw()
 			
 //			glDisable(GL_DEPTH_TEST);
 			
-			oculusRift.beginOverlay(-150);
+			oculusRift.beginOverlay(-200);
 			ofRectangle overlayRect = oculusRift.getOverlayRectangle();
 			
 			ofPushStyle();
 			ofEnableAlphaBlending();
 			ofFill();
 			ofSetColor(255, 40, 10, 200);
-			ofRect(overlayRect.x,
-				   overlayRect.y,
-				   overlayRect.width*.75,
-				   overlayRect.height*.75);
+			
+			ofRect(overlayRect);
 			
 			ofSetColor(255,255);
-			ofRect(overlayRect.getCenter().x-10,
-				   overlayRect.getCenter().y-10,
-				   20,20);
 //
 			
 			ofFill();
@@ -140,23 +131,25 @@ void testApp::drawScene()
 //		ofRotate(ofGetElapsedTimef()*(50-demos[i].radius), 0, 1, 0);
 		ofTranslate(demos[i].floatPos);
 //		ofRotate(ofGetElapsedTimef()*4*(50-demos[i].radius), 0, 1, 0);
-		ofSetColor(demos[i].bHighlighted? ofColor::white : demos[i].color);
+		ofSetColor(demos[i].bHighlighted ? ofColor::white.getLerped(ofColor::red, sin(ofGetElapsedTimef()*10.0)*.5+.5) : demos[i].color);
 		ofSphere(demos[i].radius);
 		ofPopMatrix();
 	}
-    ofSetColor(255, 0, 0);
+    
 	
+	ofSetColor(255, 0, 0);
+	//billboard and draw the mouse
 	ofPushMatrix();
 	ofNode n;
-	n.setPosition(cursor3D);
+	n.setPosition( oculusRift.mousePosition3D() );
 	n.lookAt(cam.getPosition());
 	ofVec3f axis; float angle;
     n.getOrientationQuat().getRotate(angle, axis);
     // Translate the object to its position.
-    ofTranslate(cursor3D);
+    ofTranslate(oculusRift.mousePosition3D() );
     // Perform the rotation.
     ofRotate(angle, axis.x, axis.y, axis.z);
-    ofCircle(0,0, 1);
+    ofCircle(0,0,.5);
 	ofPopMatrix();
 	
 	ofPopStyle();
@@ -183,6 +176,13 @@ void testApp::keyPressed(int key)
 	if(key == 'r'){
 		showOverlay = !showOverlay;
 	}
+	
+	if(key == 'h'){
+		ofHideCursor();
+	}
+	if(key == 'H'){
+		ofShowCursor();
+	}
 }
 
 //--------------------------------------------------------------
@@ -194,13 +194,13 @@ void testApp::keyReleased(int key)
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y)
 {
-    cursor2D.set(x, y, cursor2D.z);
+ //   cursor2D.set(x, y, cursor2D.z);
 }
 
 //--------------------------------------------------------------
 void testApp::mouseDragged(int x, int y, int button)
 {
-    cursor2D.set(x, y, cursor2D.z);
+//    cursor2D.set(x, y, cursor2D.z);
 }
 
 //--------------------------------------------------------------
