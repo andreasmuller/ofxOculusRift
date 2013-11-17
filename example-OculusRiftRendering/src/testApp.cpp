@@ -10,7 +10,7 @@ void testApp::setup()
 //    ofToggleFullscreen();
 	showOverlay = false;
 	
-//	ofHideCursor();
+	ofHideCursor();
 	
 	oculusRift.baseCamera = &cam;
 	oculusRift.setup();
