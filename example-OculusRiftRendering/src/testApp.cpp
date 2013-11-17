@@ -56,7 +56,7 @@ void testApp::update()
         // Check for collisions with cursor.
         cursorRift = oculusRift.screenToOculus2D(cursor2D);
         for(int i = 0; i < demos.size(); i++){
-            demoRift = oculusRift.screenToOculus2D(demos[i].floatPos);
+            demoRift = oculusRift.worldToScreen(demos[i].floatPos);
             cout << "distance = " << ofDist(cursorRift.x, cursorRift.y, demoRift.x, demoRift.y) << endl;
         }
     }
