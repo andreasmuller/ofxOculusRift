@@ -21,9 +21,7 @@ void testApp::setup()
 						  ofRandom(255),
 						  ofRandom(255));
 		
-		d.pos = ofVec3f(ofRandom(-500, 500),
-						0,
-						ofRandom(-500,500));
+		d.pos = ofVec3f(ofRandom(-500, 500),0,ofRandom(-500,500));
 		
 		d.floatPos.x = d.pos.x;
 		d.floatPos.z = d.pos.z;
@@ -83,8 +81,7 @@ void testApp::draw()
 			
 			ofSetColor(255,255);
 			ofFill();
-			ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), 40, 40  );
-			ofDrawBitmapString("ofxOculusRift by\nAndreas Muller\nJames George\nJason Walters\nElie Zananiri", 20, 40);
+			ofDrawBitmapString("ofxOculusRift by\nAndreas Muller\nJames George\nJason Walters\nElie Zananiri\nFPS:"+ofToString(ofGetFrameRate()), 40, 40);
 			
 			ofPopStyle();
 			oculusRift.endOverlay();
@@ -133,20 +130,17 @@ void testApp::drawScene()
 	}
     
 	
-	ofSetColor(255, 0, 0);
+	
 	//billboard and draw the mouse
-	ofPushMatrix();
-	ofNode n;
-	n.setPosition( oculusRift.mousePosition3D() );
-	n.lookAt(cam.getPosition());
-	ofVec3f axis; float angle;
-    n.getOrientationQuat().getRotate(angle, axis);
-    // Translate the object to its position.
-    ofTranslate(oculusRift.mousePosition3D() );
-    // Perform the rotation.
-    ofRotate(angle, axis.x, axis.y, axis.z);
-    ofCircle(0,0,.5);
-	ofPopMatrix();
+	if(oculusRift.isSetup()){
+		
+		ofPushMatrix();
+		ofSetColor(255, 0, 0);
+		oculusRift.multBillboardMatrix();
+		ofCircle(0,0,.5);
+		ofPopMatrix();
+	
+	}
 	
 	ofPopStyle();
     

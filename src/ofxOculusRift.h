@@ -69,6 +69,11 @@ class ofxOculusRift
 	//returns a 3d position of the mouse projected in front of the camera, at point z
 	ofVec3f mousePosition3D(float z = 0, bool considerHeadOrientation = false);
 	
+	//sets up the view so that things drawn in 2D are billboarded to the caemra,
+	//centered at the mouse
+	//Good way to draw custom cursors. don't forget to push/pop matrix around the call
+	void multBillboardMatrix();
+	
 	float distanceFromMouse(ofVec3f worldPoint);
 	float distanceFromScreenPoint(ofVec3f worldPoint, ofVec2f screenPoint);
 	
