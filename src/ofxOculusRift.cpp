@@ -17,6 +17,7 @@ varying vec2 oTexCoord;
 void main()
 {
 	oTexCoord = gl_MultiTexCoord0.xy / dimensions;
+	gl_FrontColor = gl_Color;
 	gl_Position = ftransform();
 });
 
@@ -60,10 +61,9 @@ void main()
         vec2 tcRed = LensCenter + Scale * thetaRed;
         float red = texture2DRect(Texture0, tcRed * dimensions).r;
         
-        gl_FragColor = vec4(red, center.g, blue, center.a);
+        gl_FragColor = vec4(red, center.g, blue, center.a) * gl_Color;
     }
-}
-                                        );
+});
 
 ofMatrix4x4 toOf(const Matrix4f& m){
 	return ofMatrix4x4(m.M[0][0],m.M[1][0],m.M[2][0],m.M[3][0],
@@ -306,6 +306,9 @@ void ofxOculusRift::beginOverlay(float overlayZ, float width, float height){
 	
 	if(overlayTarget.getWidth() != width || overlayTarget.getHeight() != height){
 		overlayTarget.allocate(width, height, GL_RGBA, 4);
+		overlayTarget.begin();
+		ofClear(0,0,0,0.0);
+		overlayTarget.end();
 	}
 	
 	overlayMesh.clear();
@@ -323,12 +326,10 @@ void ofxOculusRift::beginOverlay(float overlayZ, float width, float height){
 	overlayMesh.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
 	
 	overlayTarget.begin();
-
-    ofClear(1.0, 0.0, 0.0);
+    ofClear(0.0, 0.0, 0.0, 0.0);
+	
     ofPushView();
     ofPushMatrix();
-	
-    //ofViewport(getOculusViewport());
 }
 
 void ofxOculusRift::endOverlay(){
