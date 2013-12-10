@@ -5,10 +5,11 @@ void testApp::setup()
 {
 	ofBackground(0);
 	ofSetLogLevel( OF_LOG_VERBOSE );
-	ofSetVerticalSync( true );
+//	ofSetVerticalSync( true );
 //    ofSetWindowPosition(1920, 0);
 //    ofToggleFullscreen();
 	showOverlay = false;
+	predictive = true;
 	
 	ofHideCursor();
 	
@@ -81,7 +82,7 @@ void testApp::draw()
 			
 			ofSetColor(255,255);
 			ofFill();
-			ofDrawBitmapString("ofxOculusRift by\nAndreas Muller\nJames George\nJason Walters\nElie Zananiri\nFPS:"+ofToString(ofGetFrameRate()), 40, 40);
+			ofDrawBitmapString("ofxOculusRift by\nAndreas Muller\nJames George\nJason Walters\nElie Zananiri\nFPS:"+ofToString(ofGetFrameRate())+"\nPredictive Tracking " + (oculusRift.getUsePredictiveOrientation() ? "YES" : "NO"), 40, 40);
 			
 			ofPopStyle();
 			oculusRift.endOverlay();
@@ -163,15 +164,23 @@ void testApp::keyPressed(int key)
 		oculusRift.lockView = !oculusRift.lockView;
 	}
 	
-	if(key == 'r'){
+	if(key == 'o'){
 		showOverlay = !showOverlay;
 	}
-	
+	if(key == 'r'){
+		oculusRift.reset();
+		
+	}
 	if(key == 'h'){
 		ofHideCursor();
 	}
 	if(key == 'H'){
 		ofShowCursor();
+	}
+	
+	if(key == 'p'){
+		predictive = !predictive;
+		oculusRift.setUsePredictedOrientation(predictive);
 	}
 }
 

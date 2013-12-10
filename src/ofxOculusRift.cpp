@@ -162,15 +162,15 @@ bool ofxOculusRift::setup(){
 	
 	renderTarget.allocate(w, h, GL_RGB, 4);
     backgroundTarget.allocate(w/2, h);
-    overlayTarget.allocate(256, 256, GL_RGBA);
+//    overlayTarget.allocate(256, 256, GL_RGBA);
 	
 	backgroundTarget.begin();
     ofClear(0.0, 0.0, 0.0);
 	backgroundTarget.end();
 	
-	overlayTarget.begin();
-	ofClear(0.0, 0.0, 0.0);
-	overlayTarget.end();
+//	overlayTarget.begin();
+//	ofClear(0.0, 0.0, 0.0);
+//	overlayTarget.end();
 	
 	//left eye
 	leftEyeMesh.addVertex(ofVec3f(0,0,0));
@@ -212,6 +212,12 @@ bool ofxOculusRift::isSetup(){
 	return bSetup;
 }
 
+void ofxOculusRift::reset(){
+	if(bSetup){
+		pFusionResult->Reset();
+	}
+}
+
 void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	
 	OVR::Util::Render::StereoEyeParams eyeRenderParams = stereo.GetEyeRenderParams( eye );
@@ -237,11 +243,9 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	
 	
 	if(bUsePredictedOrientation){
-		//headRotation = toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
 		orientationMatrix = toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
 	}
 	else{
-		//headRotation = toOf(Matrix4f(pFusionResult->GetOrientation()));
 		orientationMatrix = toOf(Matrix4f(pFusionResult->GetOrientation()));
 	}
 	
@@ -250,7 +254,6 @@ void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 		headRotation = headRotation * baseCamera->getGlobalTransformMatrix();
 		baseCamera->begin();
 		baseCamera->end();
-
 	}
 	
 	// lock the camera when enabled...
@@ -306,9 +309,6 @@ void ofxOculusRift::beginOverlay(float overlayZ, float width, float height){
 	
 	if(overlayTarget.getWidth() != width || overlayTarget.getHeight() != height){
 		overlayTarget.allocate(width, height, GL_RGBA, 4);
-		overlayTarget.begin();
-		ofClear(0,0,0,0.0);
-		overlayTarget.end();
 	}
 	
 	overlayMesh.clear();
@@ -490,7 +490,7 @@ void ofxOculusRift::draw(){
 	if(!bSetup) return;
 	
 	distortionShader.begin();
-	distortionShader.setUniformTexture("Texture0", renderTarget.getTextureReference(), 0);
+	distortionShader.setUniformTexture("Texture0", renderTarget.getTextureReference(), 1);
 	distortionShader.setUniform2f("dimensions", renderTarget.getWidth(), renderTarget.getHeight());
 	const OVR::Util::Render::DistortionConfig& distortionConfig = stereo.GetDistortionConfig();
     distortionShader.setUniform4f("HmdWarpParam",
@@ -566,5 +566,7 @@ void ofxOculusRift::setupShaderUniforms(OVR::Util::Render::StereoEye eye){
 void ofxOculusRift::setUsePredictedOrientation(bool usePredicted){
 	bUsePredictedOrientation = usePredicted;
 }
-
+bool ofxOculusRift::getUsePredictiveOrientation(){
+	return bUsePredictedOrientation;
+}
 

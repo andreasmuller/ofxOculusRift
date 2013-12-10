@@ -36,6 +36,7 @@ class testApp : public ofBaseApp
 	ofLight				light;
 	ofEasyCam			cam;
 	bool showOverlay;
+	bool predictive;
 	vector<DemoSphere> demos;
     
     ofVec3f cursor2D;

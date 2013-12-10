@@ -36,6 +36,7 @@ class ofxOculusRift
 	
 	bool setup();
 	bool isSetup();
+	void reset();
 	bool lockView;
     
 	//draw background, before rendering eyes
@@ -55,6 +56,7 @@ class ofxOculusRift
 	void draw();
 	
 	void setUsePredictedOrientation(bool usePredicted);
+	bool getUsePredictiveOrientation();
 	
 	void reloadShader();
 
