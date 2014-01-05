@@ -426,13 +426,36 @@ void ofxOculusRift::renderOverlay(){
 
 }
 
-//TODO head orientation not considered
 ofVec3f ofxOculusRift::worldToScreen(ofVec3f worldPosition, bool considerHeadOrientation){
 
 	if(baseCamera == NULL){
 		return ofVec3f(0,0,0);
 	}
-	ofRectangle viewport = getOculusViewport();
+
+    ofRectangle viewport = getOculusViewport();
+
+    if (considerHeadOrientation) {
+        // We'll combine both left and right eye projections to get a midpoint.
+        OVR::Util::Render::StereoEyeParams eyeRenderParams = stereo.GetEyeRenderParams(OVR::Util::Render::StereoEye_Left);
+        ofMatrix4x4 projectionMatrixLeft = toOf(eyeRenderParams.Projection);
+        eyeRenderParams = stereo.GetEyeRenderParams(OVR::Util::Render::StereoEye_Right);
+        ofMatrix4x4 projectionMatrixRight = toOf(eyeRenderParams.Projection);
+
+        ofMatrix4x4 modelViewMatrix = orientationMatrix;
+        modelViewMatrix = modelViewMatrix * baseCamera->getGlobalTransformMatrix();
+        baseCamera->begin();
+        baseCamera->end();
+        modelViewMatrix = modelViewMatrix.getInverse();
+    
+        ofVec3f cameraXYZ = worldPosition * (modelViewMatrix * projectionMatrixLeft);
+        cameraXYZ.interpolate(worldPosition * (modelViewMatrix * projectionMatrixRight), 0.5f);
+
+        ofVec3f screenXYZ((cameraXYZ.x + 1.0f) / 2.0f * viewport.width + viewport.x,
+                          (1.0f - cameraXYZ.y) / 2.0f * viewport.height + viewport.y,
+                          cameraXYZ.z);        
+        return screenXYZ;
+    }
+    
 	return baseCamera->worldToScreen(worldPosition, viewport);
 }
 
