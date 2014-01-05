@@ -53,19 +53,17 @@ void testApp::update()
 	}
     
     if(oculusRift.isSetup()){
-//        ofVec3f riftEuler = oculusRift.getOrientationQuat().getEuler();
-//        cout << riftEuler << endl;
-//        cursorGaze.x = ofMap(riftEuler.y, 90, -90, oculusRift.getOculusViewport().getMinX(), oculusRift.getOculusViewport().getMaxX());
-//        cursorGaze.y = ofMap(riftEuler.z, 90, -90, oculusRift.getOculusViewport().getMinY(), oculusRift.getOculusViewport().getMaxY());
-		
+        ofRectangle viewport = oculusRift.getOculusViewport();
         for(int i = 0; i < demos.size(); i++){
             // mouse selection
 			float mouseDist = oculusRift.distanceFromMouse(demos[i].floatPos);
             demos[i].bMouseOver = (mouseDist < 50);
             
             // gaze selection
-            float gazeDist = oculusRift.distanceFromGaze(demos[i].floatPos);
-            demos[i].bGazeOver = (gazeDist < 50);
+            ofVec3f screenPos = oculusRift.worldToScreen(demos[i].floatPos, true);
+            float gazeDist = ofDist(screenPos.x, screenPos.y,
+                                    viewport.getCenter().x, viewport.getCenter().y);
+            demos[i].bGazeOver = (gazeDist < 25);
         }
     }
 }
@@ -93,6 +91,10 @@ void testApp::draw()
 			ofSetColor(255,255);
 			ofFill();
 			ofDrawBitmapString("ofxOculusRift by\nAndreas Muller\nJames George\nJason Walters\nElie Zananiri\nFPS:"+ofToString(ofGetFrameRate())+"\nPredictive Tracking " + (oculusRift.getUsePredictiveOrientation() ? "YES" : "NO"), 40, 40);
+            
+            ofSetColor(0, 255, 0);
+            ofNoFill();
+            ofCircle(overlayRect.getCenter(), 20);
 			
 			ofPopStyle();
 			oculusRift.endOverlay();
@@ -112,23 +114,6 @@ void testApp::draw()
 		oculusRift.draw();
 		
 		glDisable(GL_DEPTH_TEST);
-        
-        oculusRift.beginOverlay(-150, oculusRift.getOculusViewport().getWidth(), oculusRift.getOculusViewport().getHeight());
-        ofRectangle overlayRect = oculusRift.getOverlayRectangle();
-        
-        ofPushStyle();
-//        ofEnableAlphaBlending();
-//        ofFill();
-//        ofSetColor(255, 40, 10, 100);
-//        
-//        ofRect(overlayRect);
-        
-        ofSetColor(0, 255, 0);
-        ofNoFill();
-        ofCircle(oculusRift.screenToOculus2D(oculusRift.gazePosition2D()), 20);
-        ofPopStyle();
-
-        oculusRift.endOverlay();
     }
 	else{
 		cam.begin();
