@@ -76,8 +76,6 @@ class ofxOculusRift
 	ofVec3f mousePosition3D(float z = 0, bool considerHeadOrientation = false);
 	
     ofVec2f gazePosition2D();
-    //returns a 3d position of the gaze projected in front of the camera, at point z
-	ofVec3f gazePosition3D(float z = 0);
     
 	//sets up the view so that things drawn in 2D are billboarded to the caemra,
 	//centered at the mouse
@@ -85,7 +83,6 @@ class ofxOculusRift
 	void multBillboardMatrix();
 	
 	float distanceFromMouse(ofVec3f worldPoint);
-    float distanceFromGaze(ofVec3f worldPoint);
 	float distanceFromScreenPoint(ofVec3f worldPoint, ofVec2f screenPoint);
 	
 	ofRectangle getOverlayRectangle() {
