@@ -8,7 +8,8 @@ typedef struct{
 	ofVec3f pos;
 	ofVec3f floatPos;
 	float radius;
-    bool bHighlighted;
+    bool bMouseOver;
+    bool bGazeOver;
 } DemoSphere;
 
 class testApp : public ofBaseApp
@@ -44,4 +45,6 @@ class testApp : public ofBaseApp
     
     ofVec3f cursorRift;
     ofVec3f demoRift;
+    
+    ofVec3f cursorGaze;
 };

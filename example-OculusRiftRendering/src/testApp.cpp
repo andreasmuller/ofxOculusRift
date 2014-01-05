@@ -29,7 +29,8 @@ void testApp::setup()
 		
 		d.radius = ofRandom(2, 50);
         
-        d.bHighlighted = false;
+        d.bMouseOver = false;
+        d.bGazeOver  = false;
         
 		demos.push_back(d);
 	}
@@ -52,10 +53,19 @@ void testApp::update()
 	}
     
     if(oculusRift.isSetup()){
+//        ofVec3f riftEuler = oculusRift.getOrientationQuat().getEuler();
+//        cout << riftEuler << endl;
+//        cursorGaze.x = ofMap(riftEuler.y, 90, -90, oculusRift.getOculusViewport().getMinX(), oculusRift.getOculusViewport().getMaxX());
+//        cursorGaze.y = ofMap(riftEuler.z, 90, -90, oculusRift.getOculusViewport().getMinY(), oculusRift.getOculusViewport().getMaxY());
 		
         for(int i = 0; i < demos.size(); i++){
-			float dist = oculusRift.distanceFromMouse( demos[i].floatPos );
-            demos[i].bHighlighted = (dist < 50);
+            // mouse selection
+			float mouseDist = oculusRift.distanceFromMouse(demos[i].floatPos);
+            demos[i].bMouseOver = (mouseDist < 50);
+            
+            // gaze selection
+            float gazeDist = oculusRift.distanceFromGaze(demos[i].floatPos);
+            demos[i].bGazeOver = (gazeDist < 50);
         }
     }
 }
@@ -88,6 +98,8 @@ void testApp::draw()
 			oculusRift.endOverlay();
 		}
         
+        ofSetColor(255);
+
 		glEnable(GL_DEPTH_TEST);
 		oculusRift.beginLeftEye();
 		drawScene();
@@ -100,7 +112,24 @@ void testApp::draw()
 		oculusRift.draw();
 		
 		glDisable(GL_DEPTH_TEST);
-	}
+        
+        oculusRift.beginOverlay(-150, oculusRift.getOculusViewport().getWidth(), oculusRift.getOculusViewport().getHeight());
+        ofRectangle overlayRect = oculusRift.getOverlayRectangle();
+        
+        ofPushStyle();
+//        ofEnableAlphaBlending();
+//        ofFill();
+//        ofSetColor(255, 40, 10, 100);
+//        
+//        ofRect(overlayRect);
+        
+        ofSetColor(0, 255, 0);
+        ofNoFill();
+        ofCircle(oculusRift.screenToOculus2D(oculusRift.gazePosition2D()), 20);
+        ofPopStyle();
+
+        oculusRift.endOverlay();
+    }
 	else{
 		cam.begin();
 		drawScene();
@@ -125,7 +154,14 @@ void testApp::drawScene()
 //		ofRotate(ofGetElapsedTimef()*(50-demos[i].radius), 0, 1, 0);
 		ofTranslate(demos[i].floatPos);
 //		ofRotate(ofGetElapsedTimef()*4*(50-demos[i].radius), 0, 1, 0);
-		ofSetColor(demos[i].bHighlighted ? ofColor::white.getLerped(ofColor::red, sin(ofGetElapsedTimef()*10.0)*.5+.5) : demos[i].color);
+
+        if (demos[i].bMouseOver)
+            ofSetColor(ofColor::white.getLerped(ofColor::red, sin(ofGetElapsedTimef()*10.0)*.5+.5));
+        else if (demos[i].bGazeOver)
+            ofSetColor(ofColor::white.getLerped(ofColor::green, sin(ofGetElapsedTimef()*10.0)*.5+.5));
+        else
+            ofSetColor(demos[i].color);
+
 		ofSphere(demos[i].radius);
 		ofPopMatrix();
 	}
@@ -136,11 +172,11 @@ void testApp::drawScene()
 	if(oculusRift.isSetup()){
 		
 		ofPushMatrix();
-		ofSetColor(255, 0, 0);
 		oculusRift.multBillboardMatrix();
+		ofSetColor(255, 0, 0);
 		ofCircle(0,0,.5);
 		ofPopMatrix();
-	
+
 	}
 	
 	ofPopStyle();

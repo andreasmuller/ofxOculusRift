@@ -466,9 +466,27 @@ ofVec3f ofxOculusRift::mousePosition3D(float z, bool considerHeadOrientation){
 	return screenToWorld(ofVec3f(ofGetMouseX(), ofGetMouseY(), z) );
 }
 
+ofVec2f ofxOculusRift::gazePosition2D(){
+    ofVec3f angles = getOrientationQuat().getEuler();
+	return ofVec2f(ofMap(angles.y, 90, -90, 0, ofGetWidth()),
+                   ofMap(angles.z, 90, -90, 0, ofGetHeight()));
+}
+
+ofVec3f ofxOculusRift::gazePosition3D(float z){
+    ofVec3f angles = getOrientationQuat().getEuler();
+	return screenToWorld(ofVec3f(ofMap(angles.y, 90, -90, 0, ofGetWidth()),
+                                 ofMap(angles.z, 90, -90, 0, ofGetHeight()),
+                                 z));
+}
+
 float ofxOculusRift::distanceFromMouse(ofVec3f worldPoint){
 	//map the current 2D position into oculus space
 	return distanceFromScreenPoint(worldPoint, ofVec3f(ofGetMouseX(), ofGetMouseY()) );
+}
+
+float ofxOculusRift::distanceFromGaze(ofVec3f worldPoint){
+	//map the current 2D position into oculus space
+	return distanceFromScreenPoint(worldPoint, gazePosition2D());
 }
 
 float ofxOculusRift::distanceFromScreenPoint(ofVec3f worldPoint, ofVec2f screenPoint){
