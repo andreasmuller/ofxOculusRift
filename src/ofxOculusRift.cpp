@@ -66,7 +66,7 @@ void main()
 });
 
 ofQuaternion toOf(const Quatf& q){
-	return ofQuaternion(q.x, q.y, q.y, q.z);
+	return ofQuaternion(q.x, q.y, q.z, q.w);
 }
 
 ofMatrix4x4 toOf(const Matrix4f& m){
