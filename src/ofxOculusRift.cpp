@@ -65,6 +65,10 @@ void main()
     }
 });
 
+ofQuaternion toOf(const Quatf& q){
+	return ofQuaternion(q.x, q.y, q.y, q.z);
+}
+
 ofMatrix4x4 toOf(const Matrix4f& m){
 	return ofMatrix4x4(m.M[0][0],m.M[1][0],m.M[2][0],m.M[3][0],
 					   m.M[0][1],m.M[1][1],m.M[2][1],m.M[3][1],
@@ -160,7 +164,7 @@ bool ofxOculusRift::setup(){
 	float w = hmdInfo.HResolution;
 	float h = hmdInfo.VResolution;
 	
-	renderTarget.allocate(w, h, GL_RGB, 4);
+	renderTarget.allocate(w, h, GL_RGB);
     backgroundTarget.allocate(w/2, h);
 //    overlayTarget.allocate(256, 256, GL_RGBA);
 	
@@ -216,6 +220,14 @@ void ofxOculusRift::reset(){
 	if(bSetup){
 		pFusionResult->Reset();
 	}
+}
+
+ofQuaternion ofxOculusRift::getOrientationQuat(){
+	return toOf(pFusionResult->GetPredictedOrientation());
+}
+
+ofMatrix4x4 ofxOculusRift::getOrientationMat(){
+	return toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
 }
 
 void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
