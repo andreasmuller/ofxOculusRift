@@ -60,6 +60,9 @@ class ofxOculusRift
 	
 	void reloadShader();
 
+	ofQuaternion getOrientationQuat();
+	ofMatrix4x4 getOrientationMat();
+	
 	//default 1 has more constrained mouse movement,
 	//while turning it up increases the reach of the mouse
 	float oculusScreenSpaceScale;
