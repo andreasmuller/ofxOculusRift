@@ -34,7 +34,7 @@ class ofxOculusRift
 	//and mix in the head transformation
 	ofCamera* baseCamera;
 	
-	bool setup();
+	bool setup( ofCamera* _baseCamera = NULL );
 	bool isSetup();
 	void reset();
 	bool lockView;

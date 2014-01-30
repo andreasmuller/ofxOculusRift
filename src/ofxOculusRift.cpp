@@ -113,7 +113,9 @@ ofxOculusRift::~ofxOculusRift(){
 }
 
 
-bool ofxOculusRift::setup(){
+bool ofxOculusRift::setup( ofCamera* _baseCamera ){
+	
+	baseCamera = _baseCamera;
 	
 	if(bSetup){
 		ofLogError("ofxOculusRift::setup") << "Already set up";
@@ -223,12 +225,22 @@ void ofxOculusRift::reset(){
 }
 
 ofQuaternion ofxOculusRift::getOrientationQuat(){
-	return toOf(pFusionResult->GetPredictedOrientation());
+	if(bUsePredictedOrientation){
+		return toOf(pFusionResult->GetPredictedOrientation());
+	}
+	else{
+		return toOf(pFusionResult->GetOrientation());
+	}
 }
 
 ofMatrix4x4 ofxOculusRift::getOrientationMat(){
-	return toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
+	//return toOf(Matrix4f(pFusionResult->GetPredictedOrientation()));
+	ofMatrix4x4 tmpMat;
+	getOrientationQuat().get( tmpMat );
+	return tmpMat;
 }
+
+
 
 void ofxOculusRift::setupEyeParams(OVR::Util::Render::StereoEye eye){
 	
