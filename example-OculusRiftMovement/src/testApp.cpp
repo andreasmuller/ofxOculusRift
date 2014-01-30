@@ -13,8 +13,8 @@ void testApp::setup()
 	
 	ofHideCursor();
 	
-	oculusRift.baseCamera = &cam;
-	oculusRift.setup();
+	//oculusRift.baseCamera = &cam;
+	oculusRift.setup( &cam );
 	
 	for(int i = 0; i < 20; i++){
 		DemoSphere d;
