@@ -166,7 +166,7 @@ T Asin(T val) {
 };
 
 #ifdef OVR_CC_MSVC
-inline int isnan(double x) { return _isnan(x); };
+//inline int isnan(double x) { return _isnan(x); };
 #endif
 
 template<class T>
