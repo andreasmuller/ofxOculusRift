@@ -29,7 +29,8 @@ void testApp::setup()
 		
 		d.radius = ofRandom(2, 50);
         
-        d.bHighlighted = false;
+        d.bMouseOver = false;
+        d.bGazeOver  = false;
         
 		demos.push_back(d);
 	}
@@ -52,10 +53,17 @@ void testApp::update()
 	}
     
     if(oculusRift.isSetup()){
-		
+        ofRectangle viewport = oculusRift.getOculusViewport();
         for(int i = 0; i < demos.size(); i++){
-			float dist = oculusRift.distanceFromMouse( demos[i].floatPos );
-            demos[i].bHighlighted = (dist < 50);
+            // mouse selection
+			float mouseDist = oculusRift.distanceFromMouse(demos[i].floatPos);
+            demos[i].bMouseOver = (mouseDist < 50);
+            
+            // gaze selection
+            ofVec3f screenPos = oculusRift.worldToScreen(demos[i].floatPos, true);
+            float gazeDist = ofDist(screenPos.x, screenPos.y,
+                                    viewport.getCenter().x, viewport.getCenter().y);
+            demos[i].bGazeOver = (gazeDist < 25);
         }
     }
 }
@@ -83,11 +91,17 @@ void testApp::draw()
 			ofSetColor(255,255);
 			ofFill();
 			ofDrawBitmapString("ofxOculusRift by\nAndreas Muller\nJames George\nJason Walters\nElie Zananiri\nFPS:"+ofToString(ofGetFrameRate())+"\nPredictive Tracking " + (oculusRift.getUsePredictiveOrientation() ? "YES" : "NO"), 40, 40);
+            
+            ofSetColor(0, 255, 0);
+            ofNoFill();
+            ofCircle(overlayRect.getCenter(), 20);
 			
 			ofPopStyle();
 			oculusRift.endOverlay();
 		}
         
+        ofSetColor(255);
+
 		glEnable(GL_DEPTH_TEST);
 		oculusRift.beginLeftEye();
 		drawScene();
@@ -100,7 +114,7 @@ void testApp::draw()
 		oculusRift.draw();
 		
 		glDisable(GL_DEPTH_TEST);
-	}
+    }
 	else{
 		cam.begin();
 		drawScene();
@@ -125,7 +139,14 @@ void testApp::drawScene()
 //		ofRotate(ofGetElapsedTimef()*(50-demos[i].radius), 0, 1, 0);
 		ofTranslate(demos[i].floatPos);
 //		ofRotate(ofGetElapsedTimef()*4*(50-demos[i].radius), 0, 1, 0);
-		ofSetColor(demos[i].bHighlighted ? ofColor::white.getLerped(ofColor::red, sin(ofGetElapsedTimef()*10.0)*.5+.5) : demos[i].color);
+
+        if (demos[i].bMouseOver)
+            ofSetColor(ofColor::white.getLerped(ofColor::red, sin(ofGetElapsedTimef()*10.0)*.5+.5));
+        else if (demos[i].bGazeOver)
+            ofSetColor(ofColor::white.getLerped(ofColor::green, sin(ofGetElapsedTimef()*10.0)*.5+.5));
+        else
+            ofSetColor(demos[i].color);
+
 		ofSphere(demos[i].radius);
 		ofPopMatrix();
 	}
@@ -136,11 +157,11 @@ void testApp::drawScene()
 	if(oculusRift.isSetup()){
 		
 		ofPushMatrix();
-		ofSetColor(255, 0, 0);
 		oculusRift.multBillboardMatrix();
+		ofSetColor(255, 0, 0);
 		ofCircle(0,0,.5);
 		ofPopMatrix();
-	
+
 	}
 	
 	ofPopStyle();
