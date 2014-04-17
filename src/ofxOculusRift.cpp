@@ -9,7 +9,7 @@
 
 #include "ofxOculusRift.h"
 
-#define GLSL(version, shader)  "#version " #version "\n" #shader
+#define GLSL(version, shader)  "#version " #version "\n#extension GL_ARB_texture_rectangle : enable\n" #shader
 static const char* OculusWarpVert = GLSL(120,
 uniform vec2 dimensions;
 varying vec2 oTexCoord;
