@@ -503,19 +503,23 @@ float ofxOculusRift::distanceFromScreenPoint(ofVec3f worldPoint, ofVec2f screenP
 	return dist;
 }
 
-
 void ofxOculusRift::multBillboardMatrix(){
+	multBillboardMatrix(mousePosition3D());
+}
+
+void ofxOculusRift::multBillboardMatrix(ofVec3f objectPosition){
+
 	if(baseCamera == NULL){
 		return;
 	}
-	ofVec3f mouse3d = mousePosition3D();
+	
 	ofNode n;
-	n.setPosition(  mouse3d );
+	n.setPosition( objectPosition );
 	n.lookAt(baseCamera->getPosition());
 	ofVec3f axis; float angle;
 	n.getOrientationQuat().getRotate(angle, axis);
 	// Translate the object to its position.
-	ofTranslate( mouse3d );
+	ofTranslate( objectPosition );
 	// Perform the rotation.
 	ofRotate(angle, axis.x, axis.y, axis.z);
 }
