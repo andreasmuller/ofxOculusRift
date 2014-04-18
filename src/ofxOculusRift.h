@@ -80,7 +80,7 @@ class ofxOculusRift
 	//sets up the view so that things drawn in 2D are billboarded to the caemra,
 	//centered at the 3d position
 	void multBillboardMatrix();//default to mouse3d position Good way to draw custom cursors. don't forget to push/pop matrix around the call
-	void multBillboardMatrix(ofVec3f objectPosition);
+	void multBillboardMatrix(ofVec3f objectPosition, ofVec3f upDirection = ofVec3f(0,1,0) );
 	
 	float distanceFromMouse(ofVec3f worldPoint);
 	float distanceFromScreenPoint(ofVec3f worldPoint, ofVec2f screenPoint);

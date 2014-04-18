@@ -507,7 +507,7 @@ void ofxOculusRift::multBillboardMatrix(){
 	multBillboardMatrix(mousePosition3D());
 }
 
-void ofxOculusRift::multBillboardMatrix(ofVec3f objectPosition){
+void ofxOculusRift::multBillboardMatrix(ofVec3f objectPosition, ofVec3f updirection){
 
 	if(baseCamera == NULL){
 		return;
@@ -515,7 +515,7 @@ void ofxOculusRift::multBillboardMatrix(ofVec3f objectPosition){
 	
 	ofNode n;
 	n.setPosition( objectPosition );
-	n.lookAt(baseCamera->getPosition());
+	n.lookAt(baseCamera->getPosition(), updirection);
 	ofVec3f axis; float angle;
 	n.getOrientationQuat().getRotate(angle, axis);
 	// Translate the object to its position.
