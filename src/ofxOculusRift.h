@@ -99,6 +99,10 @@ class ofxOculusRift
 	
 	ofRectangle getOculusViewport();
 
+    string getProductName();
+    int getVersion();
+    bool isHD();
+
 
   private:
 	bool bSetup;
