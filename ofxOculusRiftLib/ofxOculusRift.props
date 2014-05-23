@@ -6,6 +6,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>..\..\..\addons\ofxOculusRift\libs\LibOVR\Include;..\..\..\addons\ofxOculusRift\libs\3rdParty;..\..\..\addons\ofxOculusRift\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\..\addons\ofxOpenCv\libs\opencv\lib\vs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
