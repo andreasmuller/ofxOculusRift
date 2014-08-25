@@ -9,7 +9,7 @@
 
 #include "ofxOculusRift.h"
 
-#define GLSL(version, shader)  "#version " #version "\n" #shader
+#define GLSL(version, shader)  "#version " #version "\n#extension GL_ARB_texture_rectangle : enable\n" #shader
 static const char* OculusWarpVert = GLSL(120,
 uniform vec2 dimensions;
 varying vec2 oTexCoord;
@@ -438,13 +438,36 @@ void ofxOculusRift::renderOverlay(){
 
 }
 
-//TODO head orientation not considered
 ofVec3f ofxOculusRift::worldToScreen(ofVec3f worldPosition, bool considerHeadOrientation){
 
 	if(baseCamera == NULL){
 		return ofVec3f(0,0,0);
 	}
-	ofRectangle viewport = getOculusViewport();
+
+    ofRectangle viewport = getOculusViewport();
+
+    if (considerHeadOrientation) {
+        // We'll combine both left and right eye projections to get a midpoint.
+        OVR::Util::Render::StereoEyeParams eyeRenderParams = stereo.GetEyeRenderParams(OVR::Util::Render::StereoEye_Left);
+        ofMatrix4x4 projectionMatrixLeft = toOf(eyeRenderParams.Projection);
+        eyeRenderParams = stereo.GetEyeRenderParams(OVR::Util::Render::StereoEye_Right);
+        ofMatrix4x4 projectionMatrixRight = toOf(eyeRenderParams.Projection);
+
+        ofMatrix4x4 modelViewMatrix = orientationMatrix;
+        modelViewMatrix = modelViewMatrix * baseCamera->getGlobalTransformMatrix();
+        baseCamera->begin();
+        baseCamera->end();
+        modelViewMatrix = modelViewMatrix.getInverse();
+    
+        ofVec3f cameraXYZ = worldPosition * (modelViewMatrix * projectionMatrixLeft);
+        cameraXYZ.interpolate(worldPosition * (modelViewMatrix * projectionMatrixRight), 0.5f);
+
+        ofVec3f screenXYZ((cameraXYZ.x + 1.0f) / 2.0f * viewport.width + viewport.x,
+                          (1.0f - cameraXYZ.y) / 2.0f * viewport.height + viewport.y,
+                          cameraXYZ.z);        
+        return screenXYZ;
+    }
+    
 	return baseCamera->worldToScreen(worldPosition, viewport);
 }
 
@@ -492,21 +515,31 @@ float ofxOculusRift::distanceFromScreenPoint(ofVec3f worldPoint, ofVec2f screenP
 	return dist;
 }
 
-
 void ofxOculusRift::multBillboardMatrix(){
+	multBillboardMatrix(mousePosition3D());
+}
+
+void ofxOculusRift::multBillboardMatrix(ofVec3f objectPosition, ofVec3f updirection){
+
 	if(baseCamera == NULL){
 		return;
 	}
-	ofVec3f mouse3d = mousePosition3D();
+	
 	ofNode n;
-	n.setPosition(  mouse3d );
-	n.lookAt(baseCamera->getPosition());
+	n.setPosition( objectPosition );
+	n.lookAt(baseCamera->getPosition(), updirection);
 	ofVec3f axis; float angle;
 	n.getOrientationQuat().getRotate(angle, axis);
 	// Translate the object to its position.
-	ofTranslate( mouse3d );
+	ofTranslate( objectPosition );
 	// Perform the rotation.
 	ofRotate(angle, axis.x, axis.y, axis.z);
+}
+
+ofVec2f ofxOculusRift::gazePosition2D(){
+    ofVec3f angles = getOrientationQuat().getEuler();
+	return ofVec2f(ofMap(angles.y, 90, -90, 0, ofGetWidth()),
+                   ofMap(angles.z, 90, -90, 0, ofGetHeight()));
 }
 
 void ofxOculusRift::draw(){
@@ -592,5 +625,18 @@ void ofxOculusRift::setUsePredictedOrientation(bool usePredicted){
 }
 bool ofxOculusRift::getUsePredictiveOrientation(){
 	return bUsePredictedOrientation;
+}
+
+string ofxOculusRift::getProductName(){
+    return hmdInfo.ProductName;
+}
+
+int ofxOculusRift::getVersion(){
+    return hmdInfo.Version;
+}
+
+bool ofxOculusRift::isHD(){
+    // EZ: My SD is at version 2, but haven't tried with an HD yet, so this is just a guess.
+    return hmdInfo.Version > 2;
 }
 
